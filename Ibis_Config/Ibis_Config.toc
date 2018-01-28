@@ -1,0 +1,9 @@
+## Interface: 70300
+## Title: Ibis - Config
+## Notes: Indicators right on your action bars. In-game configuration.
+## Version: r1
+## Author: Shockah-Ghostlands-EU
+## Dependencies: Ibis
+
+# Addon code
+Core.lua

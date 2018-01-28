@@ -1,0 +1,9 @@
+## Interface: 70300
+## Title: Ibis - Vanilla
+## Notes: Indicators right on your action bars. Handling vanilla action bars.
+## Version: r1
+## Author: Shockah-Ghostlands-EU
+## Dependencies: Ibis
+
+# Addon code
+Core.lua

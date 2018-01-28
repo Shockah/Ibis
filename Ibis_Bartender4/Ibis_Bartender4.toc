@@ -1,0 +1,9 @@
+## Interface: 70300
+## Title: Ibis - Bartender4
+## Notes: Indicators right on your action bars. Handling Bartender 4 action bars.
+## Version: r1
+## Author: Shockah-Ghostlands-EU
+## Dependencies: Ibis, Bartender4
+
+# Addon code
+Core.lua
