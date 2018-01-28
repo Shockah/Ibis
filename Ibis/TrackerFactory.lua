@@ -57,7 +57,7 @@ function Class:Instantiate(config)
 
 		if config.indicators then
 			for _, v in pairs(config.indicators) do
-				table.insert(tracker.indicatorConfigs, v)
+				table.insert(tracker.indicatorConfigs, S:DeepClone(v))
 			end
 		end
 	end

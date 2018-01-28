@@ -294,6 +294,7 @@ function Instance:Setup(action, config, tracker)
 	self.config = config
 
 	local scale = config.scale or 1.1
+	scale = scale * action.button:GetScale()
 
 	self:ClearAllPoints()
 	self:SetPoint("CENTER", action.button, "CENTER")

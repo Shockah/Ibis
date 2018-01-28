@@ -5,4 +5,5 @@
 	<Include file="Libs\AceEvent-3.0\AceEvent-3.0.xml"/>
 	<Include file="Libs\AceDB-3.0\AceDB-3.0.xml"/>
 	<Script file="Libs\LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
+	<Script file="Libs\LibButtonGlow-1.0\LibButtonGlow-1.0.lua"/>
 </Ui>

@@ -4,6 +4,7 @@ _G[addonName] = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceEvent-3.0")
 local Addon = _G[addonName]
 local S = LibStub:GetLibrary("ShockahUtils")
 local LibDualSpec = LibStub("LibDualSpec-1.0", true)
+local LBG = LibStub("LibButtonGlow-1.0", true)
 
 Addon.defaultTrackerConfigs = {}
 Addon.allTrackers = {}
@@ -12,6 +13,7 @@ Addon.trackers = {}
 
 local actionButtonHandlers = {}
 local indicatorFactories = {}
+local original_ShowOverlayGlow = nil
 
 function Addon:OnInitialize()
 	self:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
@@ -56,6 +58,7 @@ function Addon:OnEnable()
 	end
 
 	self:DeserializeConfig()
+	self:UpdateSettings()
 end
 
 function Addon:DeserializeConfig()
@@ -85,6 +88,20 @@ function Addon:SerializeConfig()
 
 	for _, tracker in pairs(self.allTrackers) do
 		table.insert(trackerConfigs, self.TrackerFactory:Serialize(tracker))
+	end
+end
+
+function Addon:UpdateSettings()
+	if not original_ShowOverlayGlow then
+		original_ShowOverlayGlow = LBG.ShowOverlayGlow
+	end
+
+	if self.db.profile.hideGlow then
+		LBG.ShowOverlayGlow = function(button)
+			-- override; do nothing
+		end
+	else
+		LBG.ShowOverlayGlow = original_ShowOverlayGlow
 	end
 end
 
@@ -149,7 +166,7 @@ function Addon:RegisterTrackerModifierFactory(trackerFactory)
 	self.TrackerFactory:RegisterModifier(trackerFactory)
 end
 
-function Addon:ParseColorConfig(config, extraDataColors)
+function Addon:ParseColorConfig(config, extraDataColors, inConfig)
 	local color = { 1.0, 1.0, 1.0, 1.0 }
 
 	--[[if config.pulsing then
@@ -178,11 +195,13 @@ function Addon:ParseColorConfig(config, extraDataColors)
 		end
 	end
 
-	if extraDataColors and config.extraDataColor then
-		local extraDataColor = extraDataColors[config.extraDataColor]
-		if extraDataColor then
-			for i = 1, 4 do
-				color[i] = extraDataColor[i]
+	if not inConfig then
+		if extraDataColors and config.extraDataColor then
+			local extraDataColor = extraDataColors[config.extraDataColor]
+			if extraDataColor then
+				for i = 1, 4 do
+					color[i] = extraDataColor[i]
+				end
 			end
 		end
 	end
@@ -199,11 +218,13 @@ function Addon:ParseColorConfig(config, extraDataColors)
 		end
 	end
 
-	if config.alphaPulsing then
-		local frequency = config.alphaPulsing.frequency or 2.0
-		local factor = config.alphaPulsing.factor or 0.0
-		local f = sin(GetTime() * 360 * frequency) * factor * 0.5 + (1.0 - factor * 0.5)
-		color[4] = color[4] * f
+	if not inConfig then
+		if config.alphaPulsing then
+			local frequency = config.alphaPulsing.frequency or 2.0
+			local factor = config.alphaPulsing.factor or 0.0
+			local f = sin(GetTime() * 360 * frequency) * factor * 0.5 + (1.0 - factor * 0.5)
+			color[4] = color[4] * f
+		end
 	end
 
 	return color

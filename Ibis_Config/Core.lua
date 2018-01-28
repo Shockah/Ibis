@@ -115,6 +115,9 @@ function Addon:SetupFrame()
 	if optionSelected == "add" then
 		frame.editorTitleGroup = self:CreateNewOptionFrame(editorTitleGroup)
 		self:UpdateConfigurationFrameToAddOption(editorScroll)
+	elseif optionSelected == "settings" then
+		frame.editorTitleGroup = self:CreateSettingsOptionFrame(editorTitleGroup)
+		self:UpdateConfigurationFrameToSettingsOption(editorScroll)
 	elseif optionSelected == "profiles" then
 		frame.editorTitleGroup = self:CreateProfilesOptionFrame(editorTitleGroup)
 		self:UpdateConfigurationFrameToProfilesOption(editorScroll)
@@ -144,6 +147,7 @@ function Addon:CreateTopOptionFrames(container)
 	container:AddChild(group)
 
 	self:CreateNewOptionFrame(group)
+	self:CreateSettingsOptionFrame(group)
 	self:CreateProfilesOptionFrame(group)
 end
 
@@ -245,6 +249,11 @@ function Addon:CreateNewOptionFrame(container)
 	self:UpdateTrackerFrameToNewOption(group)
 end
 
+function Addon:CreateSettingsOptionFrame(container)
+	local group = self:CreateEntryFrame(container)
+	self:UpdateTrackerFrameToSettingsOption(group)
+end
+
 function Addon:CreateProfilesOptionFrame(container)
 	local group = self:CreateEntryFrame(container)
 	self:UpdateTrackerFrameToProfilesOption(group)
@@ -266,8 +275,18 @@ function Addon:UpdateTrackerFrameToNewOption(container)
 	end)
 end
 
-function Addon:UpdateTrackerFrameToProfilesOption(container)
+function Addon:UpdateTrackerFrameToSettingsOption(container)
 	container.icon:SetImage("Interface/Icons/INV_Misc_Gear_05")
+	container.label:SetText("Settings")
+
+	container.icon:SetCallback("OnClick", function(self, event)
+		optionSelected = "settings"
+		Addon:SetupFrame()
+	end)
+end
+
+function Addon:UpdateTrackerFrameToProfilesOption(container)
+	container.icon:SetImage("Interface/Icons/Achievement_Character_Human_Male")
 	container.label:SetText("Profiles")
 
 	container.icon:SetCallback("OnClick", function(self, event)
@@ -327,6 +346,28 @@ function Addon:UpdateConfigurationFrameToAddOption(container)
 		optionSelected = tracker
 		Addon:SetupFrame()
 	end)
+end
+
+function Addon:UpdateConfigurationFrameToSettingsOption(container)
+	container:ReleaseChildren()
+
+	local generalHeading = AceGUI:Create("Heading")
+	generalHeading:SetText("General")
+	generalHeading:SetFullWidth(true)
+	container:AddChild(generalHeading)
+
+	local hideGlowCheckbox = AceGUI:Create("CheckBox")
+	hideGlowCheckbox:SetLabel("Hide action button glow")
+	hideGlowCheckbox:SetValue(BaseAddon.db.profile.hideGlow)
+	hideGlowCheckbox:SetFullWidth(true)
+	hideGlowCheckbox:SetCallback("OnValueChanged", function(self, event, value)
+		if not value then
+			value = nil
+		end
+		BaseAddon.db.profile.hideGlow = value
+		BaseAddon:UpdateSettings()
+	end)
+	container:AddChild(hideGlowCheckbox)
 end
 
 function Addon:UpdateConfigurationFrameToProfilesOption(container)
@@ -573,6 +614,9 @@ function Addon:CreateTalentConfigurationFrame(container, tracker)
 					end
 				end
 				if value ~= nil then
+					if not tracker.talent then
+						tracker.talent = {}
+					end
 					table.insert(tracker.talent, { i, j, value })
 				end
 				Addon:Refresh(tracker)

@@ -94,8 +94,28 @@ end
 -- tables
 ------------------------------
 
-function Self:Clone(prototype)
-	return self:CloneInto(prototype, {})
+function Self:DeepClone(v)
+	if v == nil then
+		return nil
+	elseif type(v) == "table" then
+		local new = {}
+		for key, value in pairs(v) do
+			new[key] = self:DeepClone(value)
+		end
+		return new
+	else
+		return v
+	end
+end
+
+function Self:Clone(v)
+	if v == nil then
+		return nil
+	elseif type(v) == "table" then
+		return self:CloneInto(v, {})
+	else
+		return v
+	end
 end
 
 function Self:CloneInto(prototype, tbl)

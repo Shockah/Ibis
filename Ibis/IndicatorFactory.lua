@@ -106,9 +106,10 @@ function Class:CreateColorConfigMenu(configAddon, tracker, container, tbl, label
 		group = container
 	end
 
-	local color = Addon:ParseColorConfig(tbl)
+	local color = Addon:ParseColorConfig(tbl, nil, true)
 	local colorPicker = AceGUI:Create("ColorPicker")
 	colorPicker:SetLabel(hasExtra and "Color" or label)
+	colorPicker:SetHasAlpha(true)
 	colorPicker:SetColor(color[1], color[2], color[3], color[4])
 	colorPicker:SetDisabled(tbl.extraDataColor ~= nil)
 	colorPicker:SetFullWidth(true)
