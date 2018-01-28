@@ -392,6 +392,7 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 		"<any>",
 		"spell",
 		"item",
+		"flyout",
 		"companion",
 		"macro",
 	}
@@ -466,9 +467,15 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 	spellEditbox:SetText(tracker.actionName)
 	spellEditbox:SetFullWidth(true)
 	spellEditbox:SetCallback("OnEnterPressed", function(self, event, text)
-		tracker.actionName = S:StringOrNil(text)
-		self:ClearFocus()
-		Addon:Refresh(tracker)
+		local value = S:StringOrNil(text)
+		if value then
+			tracker.actionName = value
+			self:ClearFocus()
+			Addon:Refresh(tracker)
+		else
+			self:SetText(tracker.actionName)
+			self:ClearFocus()
+		end
 	end)
 	container:AddChild(spellEditbox)
 

@@ -5,5 +5,8 @@
 ## Author: Shockah-Ghostlands-EU
 ## Dependencies: Ibis
 
+# Embedded Ace 3.0 Libraries
+embeds.xml
+
 # Addon code
 Core.lua

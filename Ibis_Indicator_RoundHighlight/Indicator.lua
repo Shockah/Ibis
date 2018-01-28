@@ -304,6 +304,10 @@ function Instance:Setup(action, config, tracker)
 	self:SetFrameStrata(config.strata or "MEDIUM")
 	self:SetDrawLayer(config.layer or "BORDER")
 	self:SetScript("OnUpdate", function(self)
+		local scale = config.scale or 1.1
+		scale = scale * action.button:GetScale()
+		self:SetSize(action.button.Border:GetWidth() * scale, action.button.Border:GetHeight() * scale)
+
 		self:Update()
 	end)
 

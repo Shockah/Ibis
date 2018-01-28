@@ -42,6 +42,8 @@ function Class:NewForActionSlot(button, slot)
 
 		if actionType == "item" and id ~= -1 then
 			actionName = GetItemInfo(id)
+		elseif actionType == "flyout" and id then
+			actionName = GetFlyoutInfo(id)
 		elseif (actionType == "spell" and id ~= -1) or (actionType == "macro" and id and id ~= -1) then
 			actionName = GetSpellInfo(id)
 			actionType = "spell"
