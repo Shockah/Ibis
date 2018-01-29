@@ -298,7 +298,7 @@ function Instance:Setup(action, config, tracker)
 
 	self:ClearAllPoints()
 	self:SetPoint("CENTER", action.button, "CENTER")
-	self:SetSize(action.button.Border:GetWidth() * scale, action.button.Border:GetHeight() * scale)
+	self:SetSize(action.button:GetWidth() * scale, action.button:GetHeight() * scale)
 	self:SetTexture(config.texture or action.button.Border:GetTexture())
 	self:SetBlendMode(config.blendMode or "ADD")
 	self:SetFrameStrata(config.strata or "MEDIUM")
