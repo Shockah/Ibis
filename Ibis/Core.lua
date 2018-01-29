@@ -4,7 +4,7 @@ _G[addonName] = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceEvent-3.0")
 local Addon = _G[addonName]
 local S = LibStub:GetLibrary("ShockahUtils")
 local LibDualSpec = LibStub("LibDualSpec-1.0", true)
-local LBG = LibStub("LibButtonGlow-1.0", true)
+local LibButtonGlow = LibStub("LibButtonGlow-1.0", true)
 
 Addon.defaultTrackerConfigs = {}
 Addon.allTrackers = {}
@@ -13,7 +13,9 @@ Addon.trackers = {}
 
 local actionButtonHandlers = {}
 local indicatorFactories = {}
-local original_ShowOverlayGlow = nil
+
+local original_Vanilla_ShowOverlayGlow = nil
+local original_LibButtonGlow_ShowOverlayGlow = nil
 
 function Addon:OnInitialize()
 	self:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
@@ -92,16 +94,24 @@ function Addon:SerializeConfig()
 end
 
 function Addon:UpdateSettings()
-	if not original_ShowOverlayGlow then
-		original_ShowOverlayGlow = LBG.ShowOverlayGlow
+	if not original_Vanilla_ShowOverlayGlow then
+		original_Vanilla_ShowOverlayGlow = ActionButton_ShowOverlayGlow
+		if LibButtonGlow then
+			original_LibButtonGlow_ShowOverlayGlow = LibButtonGlow.ShowOverlayGlow
+		end
 	end
 
 	if self.db.profile.hideGlow then
-		LBG.ShowOverlayGlow = function(button)
-			-- override; do nothing
+		local blankFunction = function() end
+		ActionButton_ShowOverlayGlow = blankFunction
+		if LibButtonGlow then
+			LibButtonGlow.ShowOverlayGlow = blankFunction
 		end
 	else
-		LBG.ShowOverlayGlow = original_ShowOverlayGlow
+		ActionButton_ShowOverlayGlow = original_Vanilla_ShowOverlayGlow
+		if LibButtonGlow then
+			LibButtonGlow.ShowOverlayGlow = original_LibButtonGlow_ShowOverlayGlow
+		end
 	end
 end
 
