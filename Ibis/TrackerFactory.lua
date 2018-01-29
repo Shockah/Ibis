@@ -49,6 +49,7 @@ function Class:Instantiate(config)
 		end
 
 		tracker.customName = config.customName
+		tracker.race = config.race
 		tracker.class = config.class
 		tracker.spec = config.spec
 		tracker.talent = config.talent
@@ -89,6 +90,7 @@ function Class:Serialize(tracker)
 	end
 
 	serialized.customName = tracker.customName
+	serialized.race = tracker.race
 	serialized.class = tracker.class
 	serialized.spec = tracker.spec
 	serialized.talent = tracker.talent

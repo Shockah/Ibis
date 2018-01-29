@@ -14,6 +14,7 @@ function Class:New(actionName, actionType)
 	obj.customName = nil
 	obj.actionName = actionName
 	obj.actionType = actionType or nil
+	obj.race = nil
 	obj.class = nil
 	obj.spec = nil
 	obj.talent = nil
@@ -81,17 +82,32 @@ function Instance:ToggleModifier(factory)
 end
 
 function Instance:ShouldLoadAtAll()
-	if self.class then
-		local foundClass = false
-		local myClass = select(2, UnitClass("player"))
-		for _, class in pairs(self.class) do
-			if not foundClass then
-				if myClass == class then
-					foundClass = true
+	if self.race then
+		local found = false
+		local myRace = select(2, UnitRace("player"))
+		for _, race in pairs(self.race) do
+			if not found then
+				if myRace == race then
+					found = true
 				end
 			end
 		end
-		if not foundClass then
+		if not found then
+			return false
+		end
+	end
+
+	if self.class then
+		local found = false
+		local myClass = select(2, UnitClass("player"))
+		for _, class in pairs(self.class) do
+			if not found then
+				if myClass == class then
+					found = true
+				end
+			end
+		end
+		if not found then
 			return false
 		end
 	end

@@ -625,6 +625,7 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 	conditionsHeading:SetFullWidth(true)
 	container:AddChild(conditionsHeading)
 
+	self:CreateRaceConfigurationFrame(container, tracker)
 	self:CreateClassConfigurationFrame(container, tracker)
 
 	if tracker.class and #tracker.class == 1 then
@@ -658,6 +659,119 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 		Addon:Refresh(tracker)
 	end)
 	container:AddChild(combatCheckbox)
+end
+
+function Addon:CreateRaceConfigurationFrame(container, tracker)
+	local group = AceGUI:Create("InlineGroup")
+	group:SetLayout("List")
+	group:SetTitle("Races")
+	group:SetFullWidth(true)
+	container:AddChild(group)
+
+	local innerGroup1 = AceGUI:Create("SimpleGroup")
+	innerGroup1:SetLayout("Flow")
+	innerGroup1:SetFullWidth(true)
+	group:AddChild(innerGroup1)
+
+	local separator = AceGUI:Create("SimpleGroup")
+	separator:SetLayout("List")
+	separator:SetFullWidth(true)
+	separator:SetAutoAdjustHeight(false)
+	separator:SetHeight(8)
+	group:AddChild(separator)
+
+	local innerGroup2 = AceGUI:Create("SimpleGroup")
+	innerGroup2:SetLayout("Flow")
+	innerGroup2:SetFullWidth(true)
+	group:AddChild(innerGroup2)
+
+	local races = {
+		{
+			id = "Pandaren",
+			localized = "Pandaren",
+		},
+		{
+			id = "Human",
+			localized = "Human",
+		},
+		{
+			id = "Orc",
+			localized = "Orc",
+		},
+		{
+			id = "Dwarf",
+			localized = "Dwarf",
+		},
+		{
+			id = "Scourge",
+			localized = "Undead",
+		},
+		{
+			id = "NightElf",
+			localized = "Night Elf",
+		},
+		{
+			id = "Tauren",
+			localized = "Tauren",
+		},
+		{
+			id = "Gnome",
+			localized = "Gnome",
+		},
+		{
+			id = "Troll",
+			localized = "Troll",
+		},
+		{
+			id = "Draenei",
+			localized = "Draenei",
+		},
+		{
+			id = "BloodElf",
+			localized = "Blood Elf",
+		},
+		{
+			id = "Worgen",
+			localized = "Worgen",
+		},
+		{
+			id = "Goblin",
+			localized = "Goblin",
+		},
+	}
+
+	for i = 0, #races do
+		local specificGroup = i <= 1 and innerGroup1 or innerGroup2
+		local raceCheckbox = AceGUI:Create("CheckBox")
+		raceCheckbox:SetRelativeWidth(0.5)
+		specificGroup:AddChild(raceCheckbox)
+
+		if i == 0 then
+			raceCheckbox:SetLabel("Any")
+			raceCheckbox:SetValue(tracker.race == nil)
+			raceCheckbox:SetCallback("OnValueChanged", function(self, event, value)
+				tracker.race = nil
+				Addon:Refresh(tracker)
+			end)
+		else
+			raceCheckbox:SetLabel(races[i].localized)
+			raceCheckbox:SetValue(tracker.race and S:Contains(tracker.race, races[i].id))
+			raceCheckbox:SetCallback("OnValueChanged", function(self, event, value)
+				if value then
+					if tracker.race == nil then
+						tracker.race = {}
+					end
+					table.insert(tracker.race, races[i].id)
+				else
+					S:RemoveValue(tracker.race, races[i].id)
+					if S:IsEmpty(tracker.race) then
+						tracker.race = nil
+					end
+				end
+				Addon:Refresh(tracker)
+			end)
+		end
+	end
 end
 
 function Addon:CreateClassConfigurationFrame(container, tracker)
