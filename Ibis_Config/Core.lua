@@ -502,6 +502,7 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 				value = nil
 			end
 			tracker.spec = value
+			tracker.talents = nil
 			Addon:Refresh(tracker)
 		end)
 		container:AddChild(specsDropdown)
@@ -561,6 +562,8 @@ function Addon:CreateClassConfigurationFrame(container, tracker)
 					tracker.class = nil
 				end
 			end
+			tracker.spec = nil
+			tracker.talents = nil
 			Addon:Refresh(tracker)
 		end)
 		innerGroup:AddChild(classCheckbox)
