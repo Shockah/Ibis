@@ -647,19 +647,28 @@ function Addon:CreateEquippedConfigurationFrame(container, tracker)
 
 	if tracker.equipped then
 		for equippedIndex, equipped in pairs(tracker.equipped) do
+			local innerGroup = AceGUI:Create("SimpleGroup")
+			innerGroup:SetLayout("Flow")
+			innerGroup:SetFullWidth(true)
+			group:AddChild(innerGroup)
+
 			local editbox = AceGUI:Create("EditBox")
 			editbox:SetText(equipped)
-			editbox:SetFullWidth(true)
+			editbox:SetRelativeWidth(0.75)
 			editbox:SetCallback("OnEnterPressed", function(self, event, text)
-				self:ClearFocus()
-				if text == "" then
-					table.remove(tracker.equipped, equippedIndex)
-				else
-					tracker.equipped[equippedIndex] = text
-				end
+				tracker.equipped[equippedIndex] = text
 				Addon:Refresh(tracker)
 			end)
-			group:AddChild(editbox)
+			innerGroup:AddChild(editbox)
+
+			local removeButton = AceGUI:Create("Button")
+			removeButton:SetText("Remove")
+			removeButton:SetRelativeWidth(0.25)
+			removeButton:SetCallback("OnClick", function(self, event)
+				table.remove(tracker.equipped, equippedIndex)
+				Addon:Refresh(tracker)
+			end)
+			innerGroup:AddChild(addButton)
 		end
 	end
 
