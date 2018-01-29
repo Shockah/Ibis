@@ -292,29 +292,32 @@ end
 
 function Instance:Setup(action, config, tracker)
 	self.config = config
-
-	local scale = config.scale or 1.1
-	scale = scale * action.button:GetScale()
+	self.action = action
+	self.tracker = tracker
 
 	self:ClearAllPoints()
-	self:SetPoint("CENTER", action.button, "CENTER")
-	self:SetSize(action.button:GetWidth() * scale, action.button:GetHeight() * scale)
+	self:SetPoint("TOPLEFT", action.button, "TOPLEFT", -14, 14)
+	self:SetPoint("BOTTOMRIGHT", action.button, "BOTTOMRIGHT", 14, -14)
+	
 	self:SetTexture(config.texture or action.button.Border:GetTexture())
 	self:SetBlendMode(config.blendMode or "ADD")
 	self:SetFrameStrata(config.strata or "MEDIUM")
 	self:SetDrawLayer(config.layer or "BORDER")
-	self:SetScript("OnUpdate", function(self)
-		local scale = config.scale or 1.1
-		scale = scale * action.button:GetScale()
-		self:SetSize(action.button.Border:GetWidth() * scale, action.button.Border:GetHeight() * scale)
 
-		self:Update()
-	end)
+	local function OnUpdate(self)
+		local scale = self.config.scale or 1.1
+		local scale = scale * self.action.button:GetScale()
+		self:SetScale(scale)
+
+		self:UpdateIndicator()
+	end
+	self:SetScript("OnUpdate", OnUpdate)
+	OnUpdate(self)
 
 	self:Show()
 end
 
-function Instance:Update()
+function Instance:UpdateIndicator()
 	local current, maximum, extraData = self.tracker:GetValue()
 	local extraDataColors = extraData and extraData.colors
 
