@@ -103,12 +103,12 @@ function Addon:UpdateSettings()
 
 	if self.db.profile.hideGlow then
 		local blankFunction = function() end
-		ActionButton_ShowOverlayGlow = blankFunction
+		--ActionButton_ShowOverlayGlow = blankFunction
 		if LibButtonGlow then
 			LibButtonGlow.ShowOverlayGlow = blankFunction
 		end
 	else
-		ActionButton_ShowOverlayGlow = original_Vanilla_ShowOverlayGlow
+		--ActionButton_ShowOverlayGlow = original_Vanilla_ShowOverlayGlow
 		if LibButtonGlow then
 			LibButtonGlow.ShowOverlayGlow = original_LibButtonGlow_ShowOverlayGlow
 		end
