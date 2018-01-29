@@ -9,6 +9,10 @@ local AceConfig = LibStub("AceConfig-3.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local LibDualSpec = LibStub("LibDualSpec-1.0", true)
 
+local libS = LibStub:GetLibrary("AceSerializer-3.0")
+local libC = LibStub:GetLibrary("LibCompress")
+local libCE = libC:GetAddonEncodeTable()
+
 _G["SLASH_"..addonName..1] = "/"..BaseAddon:GetName():lower()
 SlashCmdList[addonName] = function(msg)
 	Addon:CreateConfigurationFrame()
@@ -24,6 +28,78 @@ function Addon:OnInitialize()
 	end
 	
 	AceConfig:RegisterOptionsTable(addonName, profilesOptions)
+end
+
+function Addon:Export(tracker)
+	local serialized = BaseAddon.TrackerFactory:Serialize(tracker)
+
+	local one = libS:Serialize(serialized)
+	local two = libC:CompressHuffman(one)
+	local final = libCE:Encode(two)
+
+	return final
+end
+
+function Addon:Import(text)
+	local one = libCE:Decode(text)
+
+	local two, message = libC:Decompress(one)
+	if not two then
+		return nil, "Invalid import string. "..message
+	end
+
+	local success, final = libS:Deserialize(two)
+	if not success then
+		return nil, "Invalid import string."
+	end
+
+	local deserialized = BaseAddon.TrackerFactory:Instantiate(final)
+	if not deserialized then
+		return nil, "Tracker configuration corrupted or you're missing some required addons."
+	end
+
+	return deserialized
+end
+
+function Addon:ShowImportExportDialog(title, text, onClick)
+	local dialogName = addonName.."_ImportExport"
+
+	StaticPopupDialogs[dialogName] = StaticPopupDialogs[dialogName] or {
+		text = title,
+		button2 = ACCEPT,
+		hasEditBox = 1,
+		hasWideEditBox = 1,
+		editBoxWidth = 350,
+		OnShow = function(self, ...)
+			self:SetWidth(420)
+			local editBox = _G[self:GetName().."WideEditBox"] or _G[self:GetName().."EditBox"]
+
+			editBox:SetText(text)
+			editBox:SetFocus()
+			editBox:HighlightText(0)
+
+			local button = _G[self:GetName().."Button2"]
+			button:ClearAllPoints()
+			button:SetWidth(200)
+			button:SetPoint("CENTER", editBox, "CENTER", 0, -30)
+		end,
+		OnHide = function() end,
+		OnAccept = function(self, ...)
+			if onClick then
+				local editBox = _G[self:GetName().."WideEditBox"] or _G[self:GetName().."EditBox"]
+				onClick(editBox:GetText())
+			end
+		end,
+		OnCancel = function() end,
+		EditBoxOnEscapePressed = function(self, ...)
+			self:GetParent():Hide()
+		end,
+		timeout = 0,
+		whileDead = 1,
+		hideOnEscape = 1,
+	}
+
+	StaticPopup_Show(dialogName)
 end
 
 function Addon:CreateConfigurationFrame()
@@ -346,6 +422,32 @@ function Addon:UpdateConfigurationFrameToAddOption(container)
 		optionSelected = tracker
 		Addon:SetupFrame()
 	end)
+
+	local separator = AceGUI:Create("SimpleGroup")
+	separator:SetLayout("List")
+	separator:SetFullWidth(true)
+	separator:SetAutoAdjustHeight(false)
+	separator:SetHeight(16)
+	container:AddChild(separator)
+
+	local importButton = AceGUI:Create("Button")
+	importButton:SetText("Remove")
+	importButton:SetFullWidth(true)
+	importButton:SetCallback("OnClick", function(self, event)
+		Addon:ShowImportExportDialog("Paste an import string:", "", function(text)
+			local newTracker, message = Addon:Import(text)
+			if message then
+				UIErrorsFrame:AddMessage(message, 1.0, 0.0, 0.0)
+			end
+
+			if newTracker then
+				table.insert(BaseAddon.allTrackers, newTracker)
+				optionSelected = newTracker
+				Addon:SetupFrame()
+			end
+		end)
+	end)
+	container:AddChild(importButton)
 end
 
 function Addon:UpdateConfigurationFrameToSettingsOption(container)
@@ -414,26 +516,40 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 		end
 	end
 
+	local actionsGroup = AceGUI:Create("SimpleGroup")
+	actionsGroup:SetLayout("Flow")
+	actionsGroup:SetFullWidth(true)
+	container:AddChild(actionsGroup)
+
+	local exportButton = AceGUI:Create("Button")
+	exportButton:SetText("Export")
+	exportButton:SetRelativeWidth(0.333)
+	exportButton:SetCallback("OnClick", function(self, event)
+		local importString = Addon:Export(tracker)
+		Addon:ShowImportExportDialog("Copy this import string:", importString, nil)
+	end)
+	actionsGroup:AddChild(exportButton)
+
 	local duplicateButton = AceGUI:Create("Button")
 	duplicateButton:SetText("Duplicate")
-	duplicateButton:SetFullWidth(true)
+	duplicateButton:SetRelativeWidth(0.333)
 	duplicateButton:SetCallback("OnClick", function(self, event)
 		local newTracker = BaseAddon.TrackerFactory:Instantiate(BaseAddon.TrackerFactory:Serialize(tracker))
 		table.insert(BaseAddon.allTrackers, newTracker)
 		optionSelected = newTracker
 		Addon:SetupFrame()
 	end)
-	container:AddChild(duplicateButton)
+	actionsGroup:AddChild(duplicateButton)
 
 	local removeButton = AceGUI:Create("Button")
 	removeButton:SetText("Remove")
-	removeButton:SetFullWidth(true)
+	removeButton:SetRelativeWidth(0.333)
 	removeButton:SetCallback("OnClick", function(self, event)
 		S:RemoveValue(BaseAddon.allTrackers, tracker)
 		optionSelected = nil
 		Addon:SetupFrame()
 	end)
-	container:AddChild(removeButton)
+	actionsGroup:AddChild(removeButton)
 
 	local customNameEditbox = AceGUI:Create("EditBox")
 	customNameEditbox:SetLabel("Custom name (optional)")
@@ -657,6 +773,7 @@ function Addon:CreateEquippedConfigurationFrame(container, tracker)
 			editbox:SetRelativeWidth(0.75)
 			editbox:SetCallback("OnEnterPressed", function(self, event, text)
 				tracker.equipped[equippedIndex] = text
+				self:ClearFocus()
 				Addon:Refresh(tracker)
 			end)
 			innerGroup:AddChild(editbox)
