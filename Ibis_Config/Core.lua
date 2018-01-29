@@ -74,6 +74,7 @@ function Addon:ShowImportDialog(onClick)
 		text = "Paste an import string:",
 		button1 = "OK",
 		hasEditBox = true,
+		editBoxWidth = 350,
 		OnShow = function(self, data)
 			self.editBox:SetText("")
 			self.editBox:SetFocus()
@@ -104,6 +105,7 @@ function Addon:ShowExportDialog(text)
 		text = "Copy an import string:",
 		button1 = "OK",
 		hasEditBox = true,
+		editBoxWidth = 350,
 		OnShow = function(self, data)
 			self.editBox:SetText(StaticPopupDialogs[dialogName].externalText or "")
 			self.editBox:SetFocus()
