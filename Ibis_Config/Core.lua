@@ -537,6 +537,13 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 		end
 	end
 
+	local factions = {
+		"<any>",
+		"Alliance",
+		"Horde",
+		"Neutral",
+	}
+
 	local actionsGroup = AceGUI:Create("SimpleGroup")
 	actionsGroup:SetLayout("Flow")
 	actionsGroup:SetFullWidth(true)
@@ -594,7 +601,11 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 	actionTypeDropdown:SetValue(S:KeyOf(actionTypes, tracker.actionType or actionTypes[1]))
 	actionTypeDropdown:SetFullWidth(true)
 	actionTypeDropdown:SetCallback("OnValueChanged", function(self, event, key)
-		tracker.actionType = actionTypes[key]
+		local value = actionTypes[key]
+		if key == 1 then
+			value = nil
+		end
+		tracker.actionType = value
 		Addon:Refresh(tracker)
 	end)
 	container:AddChild(actionTypeDropdown)
@@ -624,6 +635,21 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 	conditionsHeading:SetText("Conditions")
 	conditionsHeading:SetFullWidth(true)
 	container:AddChild(conditionsHeading)
+
+	local factionDropdown = AceGUI:Create("Dropdown")
+	factionDropdown:SetLabel("Faction")
+	factionDropdown:SetList(factions)
+	factionDropdown:SetValue(S:KeyOf(factions, tracker.faction or factions[1]))
+	factionDropdown:SetFullWidth(true)
+	factionDropdown:SetCallback("OnValueChanged", function(self, event, key)
+		local value = factions[key]
+		if key == 1 then
+			value = nil
+		end
+		tracker.faction = value
+		Addon:Refresh(tracker)
+	end)
+	container:AddChild(factionDropdown)
 
 	self:CreateRaceConfigurationFrame(container, tracker)
 	self:CreateClassConfigurationFrame(container, tracker)

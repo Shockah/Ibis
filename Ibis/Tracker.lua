@@ -14,6 +14,7 @@ function Class:New(actionName, actionType)
 	obj.customName = nil
 	obj.actionName = actionName
 	obj.actionType = actionType or nil
+	obj.faction = nil
 	obj.race = nil
 	obj.class = nil
 	obj.spec = nil
@@ -82,6 +83,10 @@ function Instance:ToggleModifier(factory)
 end
 
 function Instance:ShouldLoadAtAll()
+	if self.faction and self.faction ~= UnitFactionGroup("player") then
+		return false
+	end
+
 	if self.race then
 		local found = false
 		local myRace = select(2, UnitRace("player"))
