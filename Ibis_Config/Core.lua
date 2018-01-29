@@ -490,20 +490,22 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 
 	self:CreateClassConfigurationFrame(container, tracker)
 
-	local specsDropdown = AceGUI:Create("Dropdown")
-	specsDropdown:SetLabel("Specialization")
-	specsDropdown:SetList(specs)
-	specsDropdown:SetValue((tracker.spec or 0) + 1)
-	specsDropdown:SetFullWidth(true)
-	specsDropdown:SetCallback("OnValueChanged", function(self, event, key)
-		local value = key - 1
-		if value == 0 then
-			value = nil
-		end
-		tracker.spec = value
-		Addon:Refresh(tracker)
-	end)
-	container:AddChild(specsDropdown)
+	if tracker.class and #tracker.class == 1 then
+		local specsDropdown = AceGUI:Create("Dropdown")
+		specsDropdown:SetLabel("Specialization")
+		specsDropdown:SetList(specs)
+		specsDropdown:SetValue((tracker.spec or 0) + 1)
+		specsDropdown:SetFullWidth(true)
+		specsDropdown:SetCallback("OnValueChanged", function(self, event, key)
+			local value = key - 1
+			if value == 0 then
+				value = nil
+			end
+			tracker.spec = value
+			Addon:Refresh(tracker)
+		end)
+		container:AddChild(specsDropdown)
+	end
 
 	self:CreateTalentConfigurationFrame(container, tracker)
 	self:CreateEquippedConfigurationFrame(container, tracker)
