@@ -36,12 +36,18 @@ function Addon:Export(tracker)
 	local one = libS:Serialize(serialized)
 	local two = libC:CompressHuffman(one)
 	local final = libCE:Encode(two)
+	local base64 = self.Base64:Encode(final)
 
-	return final
+	return base64
 end
 
 function Addon:Import(text)
-	local one = libCE:Decode(text)
+	local unbase64 = self.Base64:Decode(text)
+	if not unbase64 then
+		return nil, "Invalid import string."
+	end
+
+	local one = libCE:Decode(unbase64)
 
 	local two, message = libC:Decompress(one)
 	if not two then
@@ -81,12 +87,17 @@ function Addon:ShowImportDialog(onClick)
 			button:ClearAllPoints()
 			button:SetWidth(200)
 			button:SetPoint("CENTER", editBox, "CENTER", 0, -30)
+			button:SetScript("OnClick", function()
+				StaticPopupDialogs[dialogName].OnAccept(self)
+				StaticPopup_Hide(dialogName)
+			end)
 		end,
 		OnHide = function() end,
 		OnAccept = function(self, ...)
-			if self.onClick then
+			local onClick = StaticPopupDialogs[dialogName].onClickFunc
+			if onClick then
 				local editBox = _G[self:GetName().."WideEditBox"] or _G[self:GetName().."EditBox"]
-				self.onClick(editBox:GetText())
+				onClick(editBox:GetText())
 			end
 		end,
 		OnCancel = function() end,
@@ -98,7 +109,7 @@ function Addon:ShowImportDialog(onClick)
 		hideOnEscape = 1,
 	}
 
-	StaticPopupDialogs[dialogName].onClick = onClick
+	StaticPopupDialogs[dialogName].onClickFunc = onClick
 	StaticPopup_Show(dialogName)
 end
 
@@ -115,7 +126,7 @@ function Addon:ShowExportDialog(text)
 			self:SetWidth(420)
 			local editBox = _G[self:GetName().."WideEditBox"] or _G[self:GetName().."EditBox"]
 
-			editBox:SetText(self.text)
+			editBox:SetText(StaticPopupDialogs[dialogName].copyText)
 			editBox:SetFocus()
 			editBox:HighlightText(0)
 
@@ -135,7 +146,7 @@ function Addon:ShowExportDialog(text)
 		hideOnEscape = 1,
 	}
 
-	StaticPopupDialogs[dialogName].text = text
+	StaticPopupDialogs[dialogName].copyText = text
 	StaticPopup_Show(dialogName)
 end
 
@@ -468,7 +479,7 @@ function Addon:UpdateConfigurationFrameToAddOption(container)
 	container:AddChild(separator)
 
 	local importButton = AceGUI:Create("Button")
-	importButton:SetText("Remove")
+	importButton:SetText("Import")
 	importButton:SetFullWidth(true)
 	importButton:SetCallback("OnClick", function(self, event)
 		Addon:ShowImportDialog(function(text)
@@ -807,7 +818,7 @@ function Addon:CreateEquippedConfigurationFrame(container, tracker)
 
 			local editbox = AceGUI:Create("EditBox")
 			editbox:SetText(equipped)
-			editbox:SetRelativeWidth(0.75)
+			editbox:SetRelativeWidth(0.65)
 			editbox:SetCallback("OnEnterPressed", function(self, event, text)
 				tracker.equipped[equippedIndex] = text
 				self:ClearFocus()
@@ -817,12 +828,12 @@ function Addon:CreateEquippedConfigurationFrame(container, tracker)
 
 			local removeButton = AceGUI:Create("Button")
 			removeButton:SetText("Remove")
-			removeButton:SetRelativeWidth(0.25)
+			removeButton:SetRelativeWidth(0.35)
 			removeButton:SetCallback("OnClick", function(self, event)
 				table.remove(tracker.equipped, equippedIndex)
 				Addon:Refresh(tracker)
 			end)
-			innerGroup:AddChild(addButton)
+			innerGroup:AddChild(removeButton)
 		end
 	end
 
