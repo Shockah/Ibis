@@ -72,44 +72,28 @@ function Addon:ShowImportDialog(onClick)
 
 	StaticPopupDialogs[dialogName] = StaticPopupDialogs[dialogName] or {
 		text = "Paste an import string:",
-		button2 = ACCEPT,
-		hasEditBox = 1,
-		hasWideEditBox = 1,
-		editBoxWidth = 350,
-		OnShow = function(self, ...)
-			self:SetWidth(420)
-			local editBox = _G[self:GetName().."WideEditBox"] or _G[self:GetName().."EditBox"]
-
-			editBox:SetText("")
-			editBox:SetFocus()
-
-			local button = _G[self:GetName().."Button2"]
-			button:ClearAllPoints()
-			button:SetWidth(200)
-			button:SetPoint("CENTER", editBox, "CENTER", 0, -30)
-			button:SetScript("OnClick", function()
-				StaticPopupDialogs[dialogName].OnAccept(self)
-				StaticPopup_Hide(dialogName)
-			end)
+		button1 = "OK",
+		hasEditBox = true,
+		OnShow = function(self, data)
+			self.editBox:SetText("")
+			self.editBox:SetFocus()
 		end,
-		OnHide = function() end,
-		OnAccept = function(self, ...)
-			local onClick = StaticPopupDialogs[dialogName].onClickFunc
+		OnAccept = function(self, data)
+			local onClick = StaticPopupDialogs[dialogName].externalOnClick
 			if onClick then
-				local editBox = _G[self:GetName().."WideEditBox"] or _G[self:GetName().."EditBox"]
-				onClick(editBox:GetText())
+				local text = self.editBox:GetText()
+				onClick(text)
 			end
 		end,
-		OnCancel = function() end,
-		EditBoxOnEscapePressed = function(self, ...)
+		EditBoxOnEscapePressed = function(self)
 			self:GetParent():Hide()
 		end,
 		timeout = 0,
-		whileDead = 1,
-		hideOnEscape = 1,
+		whileDead = true,
+		hideOnEscape = true,
 	}
 
-	StaticPopupDialogs[dialogName].onClickFunc = onClick
+	StaticPopupDialogs[dialogName].externalOnClick = onClick
 	StaticPopup_Show(dialogName)
 end
 
@@ -118,35 +102,22 @@ function Addon:ShowExportDialog(text)
 
 	StaticPopupDialogs[dialogName] = StaticPopupDialogs[dialogName] or {
 		text = "Copy an import string:",
-		button2 = ACCEPT,
-		hasEditBox = 1,
-		hasWideEditBox = 1,
-		editBoxWidth = 350,
-		OnShow = function(self, ...)
-			self:SetWidth(420)
-			local editBox = _G[self:GetName().."WideEditBox"] or _G[self:GetName().."EditBox"]
-
-			editBox:SetText(StaticPopupDialogs[dialogName].copyText)
-			editBox:SetFocus()
-			editBox:HighlightText(0)
-
-			local button = _G[self:GetName().."Button2"]
-			button:ClearAllPoints()
-			button:SetWidth(200)
-			button:SetPoint("CENTER", editBox, "CENTER", 0, -30)
+		button1 = "OK",
+		hasEditBox = true,
+		OnShow = function(self, data)
+			self.editBox:SetText(StaticPopupDialogs[dialogName].externalText or "")
+			self.editBox:SetFocus()
+			self.editBox:HighlightText(0)
 		end,
-		OnHide = function() end,
-		OnAccept = function() end,
-		OnCancel = function() end,
-		EditBoxOnEscapePressed = function(self, ...)
+		EditBoxOnEscapePressed = function(self)
 			self:GetParent():Hide()
 		end,
 		timeout = 0,
-		whileDead = 1,
-		hideOnEscape = 1,
+		whileDead = true,
+		hideOnEscape = true,
 	}
 
-	StaticPopupDialogs[dialogName].copyText = text
+	StaticPopupDialogs[dialogName].externalText = text
 	StaticPopup_Show(dialogName)
 end
 
