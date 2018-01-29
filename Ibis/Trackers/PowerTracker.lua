@@ -103,7 +103,7 @@ function Private:Register()
 		local powerTypeDropdown = AceGUI:Create("Dropdown")
 		powerTypeDropdown:SetLabel("Power type")
 		powerTypeDropdown:SetList(powerTypes)
-		powerTypeDropdown:SetValue(S:KeyOf(powerTypes, tracker.powerType or powerTypes[-1]))
+		powerTypeDropdown:SetValue(tracker.powerType or -1)
 		powerTypeDropdown:SetFullWidth(true)
 		powerTypeDropdown:SetCallback("OnValueChanged", function(self, event, key)
 			local value = key
