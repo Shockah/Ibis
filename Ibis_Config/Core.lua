@@ -61,11 +61,11 @@ function Addon:Import(text)
 	return deserialized
 end
 
-function Addon:ShowImportExportDialog(title, text, onClick)
-	local dialogName = addonName.."_ImportExport"
+function Addon:ShowImportDialog(onClick)
+	local dialogName = addonName.."_Import"
 
 	StaticPopupDialogs[dialogName] = StaticPopupDialogs[dialogName] or {
-		text = title,
+		text = "Paste an import string:",
 		button2 = ACCEPT,
 		hasEditBox = 1,
 		hasWideEditBox = 1,
@@ -74,9 +74,8 @@ function Addon:ShowImportExportDialog(title, text, onClick)
 			self:SetWidth(420)
 			local editBox = _G[self:GetName().."WideEditBox"] or _G[self:GetName().."EditBox"]
 
-			editBox:SetText(text)
+			editBox:SetText("")
 			editBox:SetFocus()
-			editBox:HighlightText(0)
 
 			local button = _G[self:GetName().."Button2"]
 			button:ClearAllPoints()
@@ -85,9 +84,9 @@ function Addon:ShowImportExportDialog(title, text, onClick)
 		end,
 		OnHide = function() end,
 		OnAccept = function(self, ...)
-			if onClick then
+			if self.onClick then
 				local editBox = _G[self:GetName().."WideEditBox"] or _G[self:GetName().."EditBox"]
-				onClick(editBox:GetText())
+				self.onClick(editBox:GetText())
 			end
 		end,
 		OnCancel = function() end,
@@ -99,6 +98,44 @@ function Addon:ShowImportExportDialog(title, text, onClick)
 		hideOnEscape = 1,
 	}
 
+	StaticPopupDialogs[dialogName].onClick = onClick
+	StaticPopup_Show(dialogName)
+end
+
+function Addon:ShowExportDialog(text)
+	local dialogName = addonName.."_Export"
+
+	StaticPopupDialogs[dialogName] = StaticPopupDialogs[dialogName] or {
+		text = "Copy an import string:",
+		button2 = ACCEPT,
+		hasEditBox = 1,
+		hasWideEditBox = 1,
+		editBoxWidth = 350,
+		OnShow = function(self, ...)
+			self:SetWidth(420)
+			local editBox = _G[self:GetName().."WideEditBox"] or _G[self:GetName().."EditBox"]
+
+			editBox:SetText(self.text)
+			editBox:SetFocus()
+			editBox:HighlightText(0)
+
+			local button = _G[self:GetName().."Button2"]
+			button:ClearAllPoints()
+			button:SetWidth(200)
+			button:SetPoint("CENTER", editBox, "CENTER", 0, -30)
+		end,
+		OnHide = function() end,
+		OnAccept = function() end,
+		OnCancel = function() end,
+		EditBoxOnEscapePressed = function(self, ...)
+			self:GetParent():Hide()
+		end,
+		timeout = 0,
+		whileDead = 1,
+		hideOnEscape = 1,
+	}
+
+	StaticPopupDialogs[dialogName].text = text
 	StaticPopup_Show(dialogName)
 end
 
@@ -434,7 +471,7 @@ function Addon:UpdateConfigurationFrameToAddOption(container)
 	importButton:SetText("Remove")
 	importButton:SetFullWidth(true)
 	importButton:SetCallback("OnClick", function(self, event)
-		Addon:ShowImportExportDialog("Paste an import string:", "", function(text)
+		Addon:ShowImportDialog(function(text)
 			local newTracker, message = Addon:Import(text)
 			if message then
 				UIErrorsFrame:AddMessage(message, 1.0, 0.0, 0.0)
@@ -526,7 +563,7 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 	exportButton:SetRelativeWidth(0.333)
 	exportButton:SetCallback("OnClick", function(self, event)
 		local importString = Addon:Export(tracker)
-		Addon:ShowImportExportDialog("Copy this import string:", importString, nil)
+		Addon:ShowExportDialog(importString)
 	end)
 	actionsGroup:AddChild(exportButton)
 
