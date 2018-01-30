@@ -29,6 +29,7 @@ function Class:Get(action, config, tracker)
 	else
 		obj = free[1]
 		table.remove(free, 1)
+		obj:SetParent(action.button)
 	end
 	obj:Setup(action, config, tracker)
 	return obj
