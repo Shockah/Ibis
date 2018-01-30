@@ -63,6 +63,44 @@ function Instance:GetConfigGroupInfo()
 	return "Generic", 0
 end
 
+function Class:GetIcon(actionType, actionName, withPlaceholderTexture)
+	local number = tonumber(actionName)
+	if number then
+		local action = Addon.Action:NewForActionSlot(nil, number)
+		return self:GetIcon(action.type, action.name)
+	else
+		local texture = nil
+
+		if actionType == nil then
+			if not texture then
+				texture = GetSpellTexture(actionName)
+			end
+			if not texture then
+				texture = select(5, GetItemInfoInstant(actionName))
+			end
+			if not texture then
+				texture = select(2, GetMacroInfo(actionName))
+			end
+		elseif actionType == "spell" or actionType == "companion" then
+			texture = GetSpellTexture(actionName)
+		elseif actionType == "item" then
+			texture = select(5, GetItemInfoInstant(actionName))
+		elseif actionType == "macro" then
+			texture = select(2, GetMacroInfo(actionName))
+		end
+
+		if texture then
+			return texture
+		else
+			return withPlaceholderTexture and "Interface/Icons/INV_Misc_QuestionMark" or nil
+		end
+	end
+end
+
+function Instance:GetIcon(withPlaceholderTexture)
+	return Class:GetIcon(self.actionType, self.actionName, withPlaceholderTexture)
+end
+
 function Instance:HasModifier(factory)
 	if self.tracker then
 		if self.factory == factory then
