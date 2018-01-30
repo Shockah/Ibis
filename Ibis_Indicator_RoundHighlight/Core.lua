@@ -18,6 +18,7 @@ function Addon:OnInitialize()
 		return {
 			type = self.type,
 			rgb = { r, g, b },
+			scale = 1.8,
 		}
 	end
 
@@ -78,7 +79,7 @@ function Addon:OnInitialize()
 		local scaleSlider = AceGUI:Create("Slider")
 		scaleSlider:SetLabel("Scale")
 		scaleSlider:SetSliderValues(0.0, 5.0, 0.01)
-		scaleSlider:SetValue(indicatorConfig.scale or 1.1)
+		scaleSlider:SetValue(indicatorConfig.scale or 1.0)
 		scaleSlider:SetFullWidth(true)
 		scaleSlider:SetCallback("OnMouseUp", function(self, event, value)
 			indicatorConfig.scale = value

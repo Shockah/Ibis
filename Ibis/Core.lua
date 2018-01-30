@@ -59,8 +59,10 @@ function Addon:OnEnable()
 		self.db.profile.trackers = self.defaultTrackerConfigs
 	end
 
-	self:DeserializeConfig()
-	self:UpdateSettings()
+	C_Timer.After(0.0, function()
+		self:DeserializeConfig()
+		self:UpdateSettings()
+	end)
 end
 
 function Addon:DeserializeConfig()

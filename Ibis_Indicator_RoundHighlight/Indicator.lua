@@ -297,8 +297,7 @@ function Instance:Setup(action, config, tracker)
 	self.tracker = tracker
 
 	self:ClearAllPoints()
-	self:SetPoint("TOPLEFT", action.button, "TOPLEFT", -14, 14)
-	self:SetPoint("BOTTOMRIGHT", action.button, "BOTTOMRIGHT", 14, -14)
+	self:SetPoint("CENTER", action.button, "CENTER")
 	
 	self:SetTexture(config.texture or action.button.Border:GetTexture())
 	self:SetBlendMode(config.blendMode or "ADD")
@@ -306,9 +305,9 @@ function Instance:Setup(action, config, tracker)
 	self:SetDrawLayer(config.layer or "BORDER")
 
 	local function OnUpdate(self)
-		local scale = self.config.scale or 1.1
-		local scale = scale * self.action.button:GetScale()
-		self:SetScale(scale)
+		local scale = config.scale or 1.0
+		scale = scale * action.button:GetScale()
+		self:SetSize(action.button:GetWidth() * scale, action.button:GetHeight() * scale)
 
 		self:UpdateIndicator()
 	end
