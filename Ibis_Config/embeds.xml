@@ -4,4 +4,5 @@
 	<Include file="Libs\AceDBOptions-3.0\AceDBOptions-3.0.xml"/>
 	<Include file="Libs\AceSerializer-3.0\AceSerializer-3.0.xml"/>
 	<Include file="Libs\LibCompress\lib.xml"/>
+	<Script file="Libs\Niji.lua"/>
 </Ui>

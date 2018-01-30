@@ -21,6 +21,8 @@ end
 local optionSelected = nil
 
 function Addon:OnInitialize()
+	self.Niji = addonTable.Niji
+
 	local profilesOptions = LibStub("AceDBOptions-3.0"):GetOptionsTable(BaseAddon.db)
 
 	if LibDualSpec then
@@ -397,35 +399,7 @@ function Addon:UpdateTrackerFrame(container, tracker)
 		return
 	end
 
-	local number = tonumber(tracker.actionName)
-	if number then
-		container.icon:SetImage("Interface/Icons/INV_Misc_QuestionMark")
-	else
-		if tracker.actionType == nil then
-			local texture
-			if not texture then
-				texture = GetSpellTexture(tracker.actionName)
-			end
-			if not texture then
-				texture = select(5, GetItemInfoInstant(tracker.actionName))
-			end
-			if not texture then
-				texture = select(2, GetMacroInfo(tracker.actionName))
-			end
-			if not texture then
-				texture = "Interface/Icons/INV_Misc_QuestionMark"
-			end
-			container.icon:SetImage(texture)
-		elseif tracker.actionType == "spell" or tracker.actionType == "companion" then
-			container.icon:SetImage(GetSpellTexture(tracker.actionName) or "Interface/Icons/INV_Misc_QuestionMark")
-		elseif tracker.actionType == "item" then
-			container.icon:SetImage(select(5, GetItemInfoInstant(tracker.actionName)) or "Interface/Icons/INV_Misc_QuestionMark")
-		elseif tracker.actionType == "macro" then
-			container.icon:SetImage(select(2, GetMacroInfo(tracker.actionName)) or "Interface/Icons/INV_Misc_QuestionMark")
-		else
-			container.icon:SetImage("Interface/Icons/INV_Misc_QuestionMark")
-		end
-	end
+	container.icon:SetImage(tracker:GetIcon(true))
 
 	container.icon:SetCallback("OnClick", function(self, event)
 		optionSelected = tracker
