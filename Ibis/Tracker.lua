@@ -9,6 +9,15 @@ local Class = {
 Addon.Tracker = Class
 local Instance = Class.prototype
 
+local flyoutTextures = {
+	[1] = "Interface/Icons/Spell_Arcane_TeleportDalaran",
+	[8] = "Interface/Icons/Spell_Arcane_TeleportDalaran",
+	[9] = "Interface/Icons/Ability_Hunter_BeastCall",
+	[10] = 136082,
+	[11] = "Interface/Icons/Spell_Arcane_PortalStormWind",
+	[12] = "Interface/Icons/Spell_Arcane_PortalOrgrimmar",
+}
+
 function Class:New(actionName, actionType)
 	local obj = S:Clone(Class.prototype)
 	obj.customName = nil
@@ -63,6 +72,19 @@ function Instance:GetConfigGroupInfo()
 	return "Generic", 0
 end
 
+function Class:GetIconForFlyoutName(flyoutName)
+	for id, flyoutTexture in pairs(flyoutTextures) do
+		if flyoutName == GetFlyoutInfo(id) then
+			return flyoutTexture
+		end
+	end
+	return nil
+end
+
+function Class:GetIconForFlyoutId(flyoutId)
+	return flyoutTextures[flyoutId]
+end
+
 function Class:GetIcon(actionType, actionName, withPlaceholderTexture)
 	local number = tonumber(actionName)
 	if number then
@@ -81,12 +103,17 @@ function Class:GetIcon(actionType, actionName, withPlaceholderTexture)
 			if not texture then
 				texture = select(2, GetMacroInfo(actionName))
 			end
+			if not texture then
+				texture = self:GetIconForFlyoutName(actionName)
+			end
 		elseif actionType == "spell" or actionType == "companion" then
 			texture = GetSpellTexture(actionName)
 		elseif actionType == "item" then
 			texture = select(5, GetItemInfoInstant(actionName))
 		elseif actionType == "macro" then
 			texture = select(2, GetMacroInfo(actionName))
+		elseif actionType == "flyout" then
+			texture = self:GetIconForFlyoutName(actionName)
 		end
 
 		if texture then
