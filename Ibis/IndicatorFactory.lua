@@ -82,7 +82,7 @@ function Class:CreateConfigMenu(configAddon, tracker, container)
 		addIndicatorButton:SetText("Add "..factory.name)
 		addIndicatorButton:SetFullWidth(true)
 		addIndicatorButton:SetCallback("OnClick", function(self, event)
-			table.insert(tracker.indicatorConfigs, factory:CreateBlankConfig(tracker))
+			table.insert(tracker.indicatorConfigs, factory:CreateBlankConfig(configAddon, tracker))
 			configAddon:Refresh(tracker)
 		end)
 		container:AddChild(addIndicatorButton)
@@ -184,7 +184,7 @@ function Class:CreateColorConfigMenu(configAddon, tracker, container, tbl, label
 	pulseGroup:AddChild(pulseFactorSlider)
 end
 
-function Instance:CreateBlankConfig(tracker)
+function Instance:CreateBlankConfig(configAddon, tracker)
 	return nil
 end
 

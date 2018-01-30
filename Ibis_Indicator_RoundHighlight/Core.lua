@@ -8,10 +8,17 @@ local BaseAddon = _G[S:Split(addonName, "_")[1]]
 function Addon:OnInitialize()
 	local factory = BaseAddon.IndicatorFactory:New("roundHighlight", "Round Highlight")
 
-	function factory:CreateBlankConfig(tracker)
+	function factory:CreateBlankConfig(configAddon, tracker)
+		local r, g, b = 1.0, 1.0, 1.0
+		local icon = tracker:GetIcon(false)
+		if icon then
+			r, g, b = configAddon.Niji.GetIconColor(icon, r, g, b)
+		end
+		
 		return {
 			type = self.type,
-			rgbi = { 255, 255, 255 },
+			rgb = { r, g, b },
+			scale = 1.8,
 		}
 	end
 
@@ -72,7 +79,7 @@ function Addon:OnInitialize()
 		local scaleSlider = AceGUI:Create("Slider")
 		scaleSlider:SetLabel("Scale")
 		scaleSlider:SetSliderValues(0.0, 5.0, 0.01)
-		scaleSlider:SetValue(indicatorConfig.scale or 1.1)
+		scaleSlider:SetValue(indicatorConfig.scale or 1.0)
 		scaleSlider:SetFullWidth(true)
 		scaleSlider:SetCallback("OnMouseUp", function(self, event, value)
 			indicatorConfig.scale = value

@@ -9,11 +9,22 @@ local Class = {
 Addon.Tracker = Class
 local Instance = Class.prototype
 
+local flyoutTextures = {
+	[1] = "Interface/Icons/Spell_Arcane_TeleportDalaran",
+	[8] = "Interface/Icons/Spell_Arcane_TeleportDalaran",
+	[9] = "Interface/Icons/Ability_Hunter_BeastCall",
+	[10] = 136082,
+	[11] = "Interface/Icons/Spell_Arcane_PortalStormWind",
+	[12] = "Interface/Icons/Spell_Arcane_PortalOrgrimmar",
+}
+
 function Class:New(actionName, actionType)
 	local obj = S:Clone(Class.prototype)
 	obj.customName = nil
 	obj.actionName = actionName
 	obj.actionType = actionType or nil
+	obj.faction = nil
+	obj.race = nil
 	obj.class = nil
 	obj.spec = nil
 	obj.talent = nil
@@ -61,6 +72,62 @@ function Instance:GetConfigGroupInfo()
 	return "Generic", 0
 end
 
+function Class:GetIconForFlyoutName(flyoutName)
+	for id, flyoutTexture in pairs(flyoutTextures) do
+		if flyoutName == GetFlyoutInfo(id) then
+			return flyoutTexture
+		end
+	end
+	return nil
+end
+
+function Class:GetIconForFlyoutId(flyoutId)
+	return flyoutTextures[flyoutId]
+end
+
+function Class:GetIcon(actionType, actionName, withPlaceholderTexture)
+	local number = tonumber(actionName)
+	if number then
+		local action = Addon.Action:NewForActionSlot(nil, number)
+		return self:GetIcon(action.type, action.name)
+	else
+		local texture = nil
+
+		if actionType == nil then
+			if not texture then
+				texture = GetSpellTexture(actionName)
+			end
+			if not texture then
+				texture = select(5, GetItemInfoInstant(actionName))
+			end
+			if not texture then
+				texture = select(2, GetMacroInfo(actionName))
+			end
+			if not texture then
+				texture = self:GetIconForFlyoutName(actionName)
+			end
+		elseif actionType == "spell" or actionType == "companion" then
+			texture = GetSpellTexture(actionName)
+		elseif actionType == "item" then
+			texture = select(5, GetItemInfoInstant(actionName))
+		elseif actionType == "macro" then
+			texture = select(2, GetMacroInfo(actionName))
+		elseif actionType == "flyout" then
+			texture = self:GetIconForFlyoutName(actionName)
+		end
+
+		if texture then
+			return texture
+		else
+			return withPlaceholderTexture and "Interface/Icons/INV_Misc_QuestionMark" or nil
+		end
+	end
+end
+
+function Instance:GetIcon(withPlaceholderTexture)
+	return Class:GetIcon(self.actionType, self.actionName, withPlaceholderTexture)
+end
+
 function Instance:HasModifier(factory)
 	if self.tracker then
 		if self.factory == factory then
@@ -81,17 +148,36 @@ function Instance:ToggleModifier(factory)
 end
 
 function Instance:ShouldLoadAtAll()
-	if self.class then
-		local foundClass = false
-		local myClass = select(2, UnitClass("player"))
-		for _, class in pairs(self.class) do
-			if not foundClass then
-				if myClass == class then
-					foundClass = true
+	if self.faction and self.faction ~= UnitFactionGroup("player") then
+		return false
+	end
+
+	if self.race then
+		local found = false
+		local myRace = select(2, UnitRace("player"))
+		for _, race in pairs(self.race) do
+			if not found then
+				if myRace == race then
+					found = true
 				end
 			end
 		end
-		if not foundClass then
+		if not found then
+			return false
+		end
+	end
+
+	if self.class then
+		local found = false
+		local myClass = select(2, UnitClass("player"))
+		for _, class in pairs(self.class) do
+			if not found then
+				if myClass == class then
+					found = true
+				end
+			end
+		end
+		if not found then
 			return false
 		end
 	end

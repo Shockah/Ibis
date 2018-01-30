@@ -9,6 +9,10 @@ local AceConfig = LibStub("AceConfig-3.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local LibDualSpec = LibStub("LibDualSpec-1.0", true)
 
+local libS = LibStub:GetLibrary("AceSerializer-3.0")
+local libC = LibStub:GetLibrary("LibCompress")
+local libCE = libC:GetAddonEncodeTable()
+
 _G["SLASH_"..addonName..1] = "/"..BaseAddon:GetName():lower()
 SlashCmdList[addonName] = function(msg)
 	Addon:CreateConfigurationFrame()
@@ -17,6 +21,8 @@ end
 local optionSelected = nil
 
 function Addon:OnInitialize()
+	self.Niji = addonTable.Niji
+
 	local profilesOptions = LibStub("AceDBOptions-3.0"):GetOptionsTable(BaseAddon.db)
 
 	if LibDualSpec then
@@ -24,6 +30,99 @@ function Addon:OnInitialize()
 	end
 	
 	AceConfig:RegisterOptionsTable(addonName, profilesOptions)
+end
+
+function Addon:Export(tracker)
+	local serialized = BaseAddon.TrackerFactory:Serialize(tracker)
+
+	local one = libS:Serialize(serialized)
+	local two = libC:CompressHuffman(one)
+	local final = libCE:Encode(two)
+	local base64 = self.Base64:Encode(final)
+
+	return base64
+end
+
+function Addon:Import(text)
+	local unbase64 = self.Base64:Decode(text)
+	if not unbase64 then
+		return nil, "Invalid import string."
+	end
+
+	local one = libCE:Decode(unbase64)
+
+	local two, message = libC:Decompress(one)
+	if not two then
+		return nil, "Invalid import string. "..message
+	end
+
+	local success, final = libS:Deserialize(two)
+	if not success then
+		return nil, "Invalid import string."
+	end
+
+	local deserialized = BaseAddon.TrackerFactory:Instantiate(final)
+	if not deserialized then
+		return nil, "Tracker configuration corrupted or you're missing some required addons."
+	end
+
+	return deserialized
+end
+
+function Addon:ShowImportDialog(onClick)
+	local dialogName = addonName.."_Import"
+
+	StaticPopupDialogs[dialogName] = StaticPopupDialogs[dialogName] or {
+		text = "Paste an import string:",
+		button1 = "OK",
+		hasEditBox = true,
+		editBoxWidth = 350,
+		OnShow = function(self, data)
+			self.editBox:SetText("")
+			self.editBox:SetFocus()
+		end,
+		OnAccept = function(self, data)
+			local onClick = StaticPopupDialogs[dialogName].externalOnClick
+			if onClick then
+				local text = self.editBox:GetText()
+				onClick(text)
+			end
+		end,
+		EditBoxOnEscapePressed = function(self)
+			self:GetParent():Hide()
+		end,
+		timeout = 0,
+		whileDead = true,
+		hideOnEscape = true,
+	}
+
+	StaticPopupDialogs[dialogName].externalOnClick = onClick
+	StaticPopup_Show(dialogName)
+end
+
+function Addon:ShowExportDialog(text)
+	local dialogName = addonName.."_Export"
+
+	StaticPopupDialogs[dialogName] = StaticPopupDialogs[dialogName] or {
+		text = "Copy an import string:",
+		button1 = "OK",
+		hasEditBox = true,
+		editBoxWidth = 350,
+		OnShow = function(self, data)
+			self.editBox:SetText(StaticPopupDialogs[dialogName].externalText or "")
+			self.editBox:SetFocus()
+			self.editBox:HighlightText(0)
+		end,
+		EditBoxOnEscapePressed = function(self)
+			self:GetParent():Hide()
+		end,
+		timeout = 0,
+		whileDead = true,
+		hideOnEscape = true,
+	}
+
+	StaticPopupDialogs[dialogName].externalText = text
+	StaticPopup_Show(dialogName)
 end
 
 function Addon:CreateConfigurationFrame()
@@ -300,35 +399,7 @@ function Addon:UpdateTrackerFrame(container, tracker)
 		return
 	end
 
-	local number = tonumber(tracker.actionName)
-	if number then
-		container.icon:SetImage("Interface/Icons/INV_Misc_QuestionMark")
-	else
-		if tracker.actionType == nil then
-			local texture
-			if not texture then
-				texture = GetSpellTexture(tracker.actionName)
-			end
-			if not texture then
-				texture = select(5, GetItemInfoInstant(tracker.actionName))
-			end
-			if not texture then
-				texture = select(2, GetMacroInfo(tracker.actionName))
-			end
-			if not texture then
-				texture = "Interface/Icons/INV_Misc_QuestionMark"
-			end
-			container.icon:SetImage(texture)
-		elseif tracker.actionType == "spell" or tracker.actionType == "companion" then
-			container.icon:SetImage(GetSpellTexture(tracker.actionName) or "Interface/Icons/INV_Misc_QuestionMark")
-		elseif tracker.actionType == "item" then
-			container.icon:SetImage(select(5, GetItemInfoInstant(tracker.actionName)) or "Interface/Icons/INV_Misc_QuestionMark")
-		elseif tracker.actionType == "macro" then
-			container.icon:SetImage(select(2, GetMacroInfo(tracker.actionName)) or "Interface/Icons/INV_Misc_QuestionMark")
-		else
-			container.icon:SetImage("Interface/Icons/INV_Misc_QuestionMark")
-		end
-	end
+	container.icon:SetImage(tracker:GetIcon(true))
 
 	container.icon:SetCallback("OnClick", function(self, event)
 		optionSelected = tracker
@@ -346,6 +417,32 @@ function Addon:UpdateConfigurationFrameToAddOption(container)
 		optionSelected = tracker
 		Addon:SetupFrame()
 	end)
+
+	local separator = AceGUI:Create("SimpleGroup")
+	separator:SetLayout("List")
+	separator:SetFullWidth(true)
+	separator:SetAutoAdjustHeight(false)
+	separator:SetHeight(16)
+	container:AddChild(separator)
+
+	local importButton = AceGUI:Create("Button")
+	importButton:SetText("Import")
+	importButton:SetFullWidth(true)
+	importButton:SetCallback("OnClick", function(self, event)
+		Addon:ShowImportDialog(function(text)
+			local newTracker, message = Addon:Import(text)
+			if message then
+				UIErrorsFrame:AddMessage(message, 1.0, 0.0, 0.0)
+			end
+
+			if newTracker then
+				table.insert(BaseAddon.allTrackers, newTracker)
+				optionSelected = newTracker
+				Addon:SetupFrame()
+			end
+		end)
+	end)
+	container:AddChild(importButton)
 end
 
 function Addon:UpdateConfigurationFrameToSettingsOption(container)
@@ -414,26 +511,47 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 		end
 	end
 
+	local factions = {
+		"<any>",
+		"Alliance",
+		"Horde",
+		"Neutral",
+	}
+
+	local actionsGroup = AceGUI:Create("SimpleGroup")
+	actionsGroup:SetLayout("Flow")
+	actionsGroup:SetFullWidth(true)
+	container:AddChild(actionsGroup)
+
+	local exportButton = AceGUI:Create("Button")
+	exportButton:SetText("Export")
+	exportButton:SetRelativeWidth(0.333)
+	exportButton:SetCallback("OnClick", function(self, event)
+		local importString = Addon:Export(tracker)
+		Addon:ShowExportDialog(importString)
+	end)
+	actionsGroup:AddChild(exportButton)
+
 	local duplicateButton = AceGUI:Create("Button")
 	duplicateButton:SetText("Duplicate")
-	duplicateButton:SetFullWidth(true)
+	duplicateButton:SetRelativeWidth(0.333)
 	duplicateButton:SetCallback("OnClick", function(self, event)
 		local newTracker = BaseAddon.TrackerFactory:Instantiate(BaseAddon.TrackerFactory:Serialize(tracker))
 		table.insert(BaseAddon.allTrackers, newTracker)
 		optionSelected = newTracker
 		Addon:SetupFrame()
 	end)
-	container:AddChild(duplicateButton)
+	actionsGroup:AddChild(duplicateButton)
 
 	local removeButton = AceGUI:Create("Button")
 	removeButton:SetText("Remove")
-	removeButton:SetFullWidth(true)
+	removeButton:SetRelativeWidth(0.333)
 	removeButton:SetCallback("OnClick", function(self, event)
 		S:RemoveValue(BaseAddon.allTrackers, tracker)
 		optionSelected = nil
 		Addon:SetupFrame()
 	end)
-	container:AddChild(removeButton)
+	actionsGroup:AddChild(removeButton)
 
 	local customNameEditbox = AceGUI:Create("EditBox")
 	customNameEditbox:SetLabel("Custom name (optional)")
@@ -457,7 +575,11 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 	actionTypeDropdown:SetValue(S:KeyOf(actionTypes, tracker.actionType or actionTypes[1]))
 	actionTypeDropdown:SetFullWidth(true)
 	actionTypeDropdown:SetCallback("OnValueChanged", function(self, event, key)
-		tracker.actionType = actionTypes[key]
+		local value = actionTypes[key]
+		if key == 1 then
+			value = nil
+		end
+		tracker.actionType = value
 		Addon:Refresh(tracker)
 	end)
 	container:AddChild(actionTypeDropdown)
@@ -488,22 +610,41 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 	conditionsHeading:SetFullWidth(true)
 	container:AddChild(conditionsHeading)
 
-	self:CreateClassConfigurationFrame(container, tracker)
-
-	local specsDropdown = AceGUI:Create("Dropdown")
-	specsDropdown:SetLabel("Specialization")
-	specsDropdown:SetList(specs)
-	specsDropdown:SetValue((tracker.spec or 0) + 1)
-	specsDropdown:SetFullWidth(true)
-	specsDropdown:SetCallback("OnValueChanged", function(self, event, key)
-		local value = key - 1
-		if value == 0 then
+	local factionDropdown = AceGUI:Create("Dropdown")
+	factionDropdown:SetLabel("Faction")
+	factionDropdown:SetList(factions)
+	factionDropdown:SetValue(S:KeyOf(factions, tracker.faction or factions[1]))
+	factionDropdown:SetFullWidth(true)
+	factionDropdown:SetCallback("OnValueChanged", function(self, event, key)
+		local value = factions[key]
+		if key == 1 then
 			value = nil
 		end
-		tracker.spec = value
+		tracker.faction = value
 		Addon:Refresh(tracker)
 	end)
-	container:AddChild(specsDropdown)
+	container:AddChild(factionDropdown)
+
+	self:CreateRaceConfigurationFrame(container, tracker)
+	self:CreateClassConfigurationFrame(container, tracker)
+
+	if tracker.class and #tracker.class == 1 then
+		local specsDropdown = AceGUI:Create("Dropdown")
+		specsDropdown:SetLabel("Specialization")
+		specsDropdown:SetList(specs)
+		specsDropdown:SetValue((tracker.spec or 0) + 1)
+		specsDropdown:SetFullWidth(true)
+		specsDropdown:SetCallback("OnValueChanged", function(self, event, key)
+			local value = key - 1
+			if value == 0 then
+				value = nil
+			end
+			tracker.spec = value
+			tracker.talents = nil
+			Addon:Refresh(tracker)
+		end)
+		container:AddChild(specsDropdown)
+	end
 
 	self:CreateTalentConfigurationFrame(container, tracker)
 	self:CreateEquippedConfigurationFrame(container, tracker)
@@ -518,6 +659,119 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 		Addon:Refresh(tracker)
 	end)
 	container:AddChild(combatCheckbox)
+end
+
+function Addon:CreateRaceConfigurationFrame(container, tracker)
+	local group = AceGUI:Create("InlineGroup")
+	group:SetLayout("List")
+	group:SetTitle("Races")
+	group:SetFullWidth(true)
+	container:AddChild(group)
+
+	local innerGroup1 = AceGUI:Create("SimpleGroup")
+	innerGroup1:SetLayout("Flow")
+	innerGroup1:SetFullWidth(true)
+	group:AddChild(innerGroup1)
+
+	local separator = AceGUI:Create("SimpleGroup")
+	separator:SetLayout("List")
+	separator:SetFullWidth(true)
+	separator:SetAutoAdjustHeight(false)
+	separator:SetHeight(8)
+	group:AddChild(separator)
+
+	local innerGroup2 = AceGUI:Create("SimpleGroup")
+	innerGroup2:SetLayout("Flow")
+	innerGroup2:SetFullWidth(true)
+	group:AddChild(innerGroup2)
+
+	local races = {
+		{
+			id = "Pandaren",
+			localized = "Pandaren",
+		},
+		{
+			id = "Human",
+			localized = "Human",
+		},
+		{
+			id = "Orc",
+			localized = "Orc",
+		},
+		{
+			id = "Dwarf",
+			localized = "Dwarf",
+		},
+		{
+			id = "Scourge",
+			localized = "Undead",
+		},
+		{
+			id = "NightElf",
+			localized = "Night Elf",
+		},
+		{
+			id = "Tauren",
+			localized = "Tauren",
+		},
+		{
+			id = "Gnome",
+			localized = "Gnome",
+		},
+		{
+			id = "Troll",
+			localized = "Troll",
+		},
+		{
+			id = "Draenei",
+			localized = "Draenei",
+		},
+		{
+			id = "BloodElf",
+			localized = "Blood Elf",
+		},
+		{
+			id = "Worgen",
+			localized = "Worgen",
+		},
+		{
+			id = "Goblin",
+			localized = "Goblin",
+		},
+	}
+
+	for i = 0, #races do
+		local specificGroup = i <= 1 and innerGroup1 or innerGroup2
+		local raceCheckbox = AceGUI:Create("CheckBox")
+		raceCheckbox:SetRelativeWidth(0.5)
+		specificGroup:AddChild(raceCheckbox)
+
+		if i == 0 then
+			raceCheckbox:SetLabel("Any")
+			raceCheckbox:SetValue(tracker.race == nil)
+			raceCheckbox:SetCallback("OnValueChanged", function(self, event, value)
+				tracker.race = nil
+				Addon:Refresh(tracker)
+			end)
+		else
+			raceCheckbox:SetLabel(races[i].localized)
+			raceCheckbox:SetValue(tracker.race and S:Contains(tracker.race, races[i].id))
+			raceCheckbox:SetCallback("OnValueChanged", function(self, event, value)
+				if value then
+					if tracker.race == nil then
+						tracker.race = {}
+					end
+					table.insert(tracker.race, races[i].id)
+				else
+					S:RemoveValue(tracker.race, races[i].id)
+					if S:IsEmpty(tracker.race) then
+						tracker.race = nil
+					end
+				end
+				Addon:Refresh(tracker)
+			end)
+		end
+	end
 end
 
 function Addon:CreateClassConfigurationFrame(container, tracker)
@@ -559,6 +813,8 @@ function Addon:CreateClassConfigurationFrame(container, tracker)
 					tracker.class = nil
 				end
 			end
+			tracker.spec = nil
+			tracker.talents = nil
 			Addon:Refresh(tracker)
 		end)
 		innerGroup:AddChild(classCheckbox)
@@ -642,19 +898,29 @@ function Addon:CreateEquippedConfigurationFrame(container, tracker)
 
 	if tracker.equipped then
 		for equippedIndex, equipped in pairs(tracker.equipped) do
+			local innerGroup = AceGUI:Create("SimpleGroup")
+			innerGroup:SetLayout("Flow")
+			innerGroup:SetFullWidth(true)
+			group:AddChild(innerGroup)
+
 			local editbox = AceGUI:Create("EditBox")
 			editbox:SetText(equipped)
-			editbox:SetFullWidth(true)
+			editbox:SetRelativeWidth(0.65)
 			editbox:SetCallback("OnEnterPressed", function(self, event, text)
+				tracker.equipped[equippedIndex] = text
 				self:ClearFocus()
-				if text == "" then
-					table.remove(tracker.equipped, equippedIndex)
-				else
-					tracker.equipped[equippedIndex] = text
-				end
 				Addon:Refresh(tracker)
 			end)
-			group:AddChild(editbox)
+			innerGroup:AddChild(editbox)
+
+			local removeButton = AceGUI:Create("Button")
+			removeButton:SetText("Remove")
+			removeButton:SetRelativeWidth(0.35)
+			removeButton:SetCallback("OnClick", function(self, event)
+				table.remove(tracker.equipped, equippedIndex)
+				Addon:Refresh(tracker)
+			end)
+			innerGroup:AddChild(removeButton)
 		end
 	end
 

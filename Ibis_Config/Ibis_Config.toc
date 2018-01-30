@@ -10,3 +10,4 @@ embeds.xml
 
 # Addon code
 Core.lua
+Base64.lua

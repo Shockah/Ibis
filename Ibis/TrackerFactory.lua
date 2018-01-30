@@ -49,10 +49,12 @@ function Class:Instantiate(config)
 		end
 
 		tracker.customName = config.customName
-		tracker.class = config.class
+		tracker.faction = config.faction
+		tracker.race = S:DeepClone(config.race)
+		tracker.class = S:DeepClone(config.class)
 		tracker.spec = config.spec
-		tracker.talent = config.talent
-		tracker.equipped = config.equipped
+		tracker.talent = S:DeepClone(config.talent)
+		tracker.equipped = S:DeepClone(config.equipped)
 		tracker.combat = config.combat
 
 		if config.indicators then
@@ -89,10 +91,12 @@ function Class:Serialize(tracker)
 	end
 
 	serialized.customName = tracker.customName
-	serialized.class = tracker.class
+	serialized.faction = tracker.faction
+	serialized.race = S:DeepClone(tracker.race)
+	serialized.class = S:DeepClone(tracker.class)
 	serialized.spec = tracker.spec
-	serialized.talent = tracker.talent
-	serialized.equipped = tracker.equipped
+	serialized.talent = S:DeepClone(tracker.talent)
+	serialized.equipped = S:DeepClone(tracker.equipped)
 	serialized.combat = tracker.combat
 
 	return serialized
