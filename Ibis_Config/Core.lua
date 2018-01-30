@@ -21,6 +21,8 @@ end
 local optionSelected = nil
 
 function Addon:OnInitialize()
+	self.Niji = addonTable.Niji
+
 	local profilesOptions = LibStub("AceDBOptions-3.0"):GetOptionsTable(BaseAddon.db)
 
 	if LibDualSpec then
