@@ -21,6 +21,7 @@ end
 local optionSelected = nil
 
 function Addon:OnInitialize()
+	table.insert(UISpecialFrames, BaseAddon:GetName().."ConfigFrame")
 	self.Niji = addonTable.Niji
 
 	local profilesOptions = LibStub("AceDBOptions-3.0"):GetOptionsTable(BaseAddon.db)
@@ -134,14 +135,42 @@ function Addon:CreateConfigurationFrame()
 
 	local frame = AceGUI:Create("Frame")
 	frame:SetCallback("OnClose", function(self)
+		local anchor, _, _, x, y = self.frame:GetPoint(1)
+		BaseAddon.db.global.configFrame = {
+			point = {
+				anchor = anchor,
+				x = x,
+				y = y,
+			},
+			size = {
+				width = self.frame:GetWidth(),
+				height = self.frame:GetHeight(),
+			},
+		}
 		AceGUI:Release(self)
 		Addon.ConfigFrame = nil
+		_G[BaseAddon:GetName().."ConfigFrame"] = nil
 	end)
 	frame:SetTitle(BaseAddon:GetName())
 	frame:SetLayout(nil)
 	--frame:SetLayout("Fill")
-	frame:SetWidth(600)
+	frame:SetWidth(680)
+	frame:SetHeight(560)
+	if BaseAddon.db.global.configFrame then
+		local frameConfig = BaseAddon.db.global.configFrame
+		if frameConfig.point then
+			local point = frameConfig.point
+			frame:ClearAllPoints()
+			frame:SetPoint(point.anchor, nil, point.anchor, point.x, point.y)
+		end
+		if frameConfig.size then
+			local size = frameConfig.size
+			frame:SetWidth(size.width)
+			frame:SetHeight(size.height)
+		end
+	end
 	Addon.ConfigFrame = frame
+	_G[BaseAddon:GetName().."ConfigFrame"] = frame
 
 	local listScrollContainer = AceGUI:Create("SimpleGroup")
 	listScrollContainer:SetLayout("Fill")
