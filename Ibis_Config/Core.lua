@@ -30,7 +30,24 @@ function Addon:OnInitialize()
 		LibDualSpec:EnhanceOptions(profilesOptions, BaseAddon.db)
 	end
 	
-	AceConfig:RegisterOptionsTable(addonName, profilesOptions)
+	AceConfig:RegisterOptionsTable(addonName.."_Profiles", profilesOptions)
+
+	AceConfig:RegisterOptionsTable(addonName.."_BlizzOptions", {
+		name = BaseAddon:GetName(),
+		handler = self,
+		type = 'group',
+		args = {
+			config = {
+				name = "Standalone config",
+				desc = "Open addon configuration.",
+				type = 'execute',
+				func = function()
+					self:CreateConfigurationFrame()
+				end
+			}
+		},
+	})
+	AceConfigDialog:AddToBlizOptions(addonName.."_BlizzOptions", BaseAddon:GetName())
 end
 
 function Addon:Export(tracker)
@@ -513,7 +530,7 @@ function Addon:UpdateConfigurationFrameToProfilesOption(container)
 	group:SetFullWidth(true)
 	container:AddChild(group)
 
-	AceConfigDialog:Open(addonName, group)
+	AceConfigDialog:Open(addonName.."_Profiles", group)
 	container:DoLayout()
 end
 
