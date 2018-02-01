@@ -116,15 +116,21 @@ function Class:CreateConfigMenu(configAddon, container, func)
 		return a.name < b.name
 	end)
 
+	local group = AceGUI:Create("InlineGroup")
+	group:SetLayout("List")
+	group:SetTitle("Add tracker...")
+	group:SetFullWidth(true)
+	container:AddChild(group)
+
 	for _, factory in pairs(sortedFactories) do
 		local addTrackerButton = AceGUI:Create("Button")
-		addTrackerButton:SetText("Add "..factory.name.." Tracker")
+		addTrackerButton:SetText(factory.name)
 		addTrackerButton:SetFullWidth(true)
 		addTrackerButton:SetCallback("OnClick", function(self, event)
 			local tracker = factory:CreateBlank(tracker)
 			func(tracker)
 		end)
-		container:AddChild(addTrackerButton)
+		group:AddChild(addTrackerButton)
 	end
 end
 

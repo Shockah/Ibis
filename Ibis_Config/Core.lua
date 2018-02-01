@@ -45,6 +45,10 @@ function Addon:Export(tracker)
 end
 
 function Addon:Import(text)
+	if not text or text == "" then
+		return nil, nil
+	end
+
 	local unbase64 = self.Base64:Decode(text)
 	if not unbase64 then
 		return nil, "Invalid import string."
@@ -95,6 +99,7 @@ function Addon:ShowImportDialog(onClick)
 		timeout = 0,
 		whileDead = true,
 		hideOnEscape = true,
+		enterClicksFirstButton = true,
 	}
 
 	StaticPopupDialogs[dialogName].externalOnClick = onClick
@@ -120,6 +125,7 @@ function Addon:ShowExportDialog(text)
 		timeout = 0,
 		whileDead = true,
 		hideOnEscape = true,
+		enterClicksFirstButton = true,
 	}
 
 	StaticPopupDialogs[dialogName].externalText = text
@@ -135,6 +141,7 @@ function Addon:CreateConfigurationFrame()
 
 	local frame = AceGUI:Create("Frame")
 	frame:SetCallback("OnClose", function(self)
+		self.frame:SetFrameStrata("FULLSCREEN_DIALOG")
 		local anchor, _, _, x, y = self.frame:GetPoint(1)
 		BaseAddon.db.global.configFrame = {
 			point = {
@@ -156,6 +163,7 @@ function Addon:CreateConfigurationFrame()
 	--frame:SetLayout("Fill")
 	frame:SetWidth(680)
 	frame:SetHeight(560)
+	frame.frame:SetFrameStrata("DIALOG")
 	if BaseAddon.db.global.configFrame then
 		local frameConfig = BaseAddon.db.global.configFrame
 		if frameConfig.point then
