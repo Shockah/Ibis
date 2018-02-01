@@ -325,3 +325,7 @@ function Addon:SetupActionButton(action)
 		end
 	end
 end
+
+function Addon:GetButtonAction(button)
+	return button._state_action or ActionButton_GetPagedID(button) or ActionButton_CalculateAction(button) or button:GetAttribute('action') or 0
+end

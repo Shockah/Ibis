@@ -12,24 +12,9 @@ local function actionButtonHandler()
 		if bar and bar.buttons and bar.numbuttons then
 			for j = 1, bar.numbuttons do
 				local button = bar.buttons[j]
-				if button and button.action then
-					local actionIndex = button.action
-					if not actionIndex or actionIndex == 0 then
-						actionIndex = button._state_action
-					end
-					if not actionIndex or actionIndex == 0 then
-						actionIndex = ActionButton_GetPagedID(button)
-					end
-					if not actionIndex or actionIndex == 0 then
-						actionIndex = ActionButton_CalculateAction(button)
-					end
-					if not actionIndex or actionIndex == 0 then
-						actionIndex = button:GetAttribute('action')
-					end
-
-					local action = BaseAddon.Action:NewForActionSlot(button, actionIndex)
+				if button then
+					local action = BaseAddon.Action:NewForActionSlot(button, BaseAddon:GetButtonAction(button))
 					if action then
-						action.slot = actionIndex
 						action.priority = 1
 						table.insert(results, action)
 					end
@@ -44,7 +29,6 @@ function Addon:OnInitialize()
 	BaseAddon:RegisterActionButtonHandler(actionButtonHandler)
 
 	--[[hooksecurefunc(Bartender4.ButtonBar.prototype, "UpdateButtonLayout", function()
-		print("kek")
 		BaseAddon:SetupActionButtons(actionButtonHandler())
 	end)]]
 	hooksecurefunc(Bartender4.ButtonBar.prototype, "ApplyConfig", function()

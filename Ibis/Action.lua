@@ -9,13 +9,13 @@ local Class = {
 Addon.Action = Class
 local Instance = Class.prototype
 
-function Class:New(button, type, id, name)
+function Class:New(button, type, id, name, slot)
 	local obj = S:Clone(Class.prototype)
 	obj.button = button
 	obj.type = type
 	obj.id = id
 	obj.name = name
-	obj.slot = nil
+	obj.slot = slot
 	obj.priority = 0
 	return obj
 end
@@ -50,8 +50,8 @@ function Class:NewForActionSlot(button, slot)
 		end
 
 		local spellLink = ((actionType == "spell" or actionType == "item") and id and id ~= -1) and GetSpellLink(id) or nil
-		return Class:New(button, actionType, id, actionName)
+		return Class:New(button, actionType, id, actionName, slot)
 	end
 
-	return Class:New(button, nil, nil, nil)
+	return Class:New(button, nil, nil, nil, slot)
 end

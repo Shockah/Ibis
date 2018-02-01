@@ -9,7 +9,6 @@ local function HandleButton(results, button)
 	if button and button.action then
 		local action = BaseAddon.Action:NewForActionSlot(button, button.action)
 		if action then
-			action.slot = button.action
 			table.insert(results, action)
 		end
 	end
