@@ -26,8 +26,3 @@ Trackers/ReputationTracker.lua
 Trackers/TotemTracker.lua
 Trackers/Modifiers/ExistsTracker.lua
 Trackers/Modifiers/ReverseTracker.lua
-
-# Default values
-Defaults/Priest/_Class.lua
-Defaults/Priest/Shadow.lua
-Defaults/Warlock/Destruction.lua
