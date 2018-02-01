@@ -20,6 +20,7 @@ TrackerFactory.lua
 Trackers/AuraTracker.lua
 Trackers/HealthTracker.lua
 Trackers/LevelTracker.lua
+Trackers/PostCastTimerTracker.lua
 Trackers/PowerTracker.lua
 Trackers/ReputationTracker.lua
 Trackers/TotemTracker.lua

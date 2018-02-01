@@ -12,8 +12,10 @@ local Instance = Class.prototype
 local factories = {}
 local modifierFactories = {}
 
+Instance.registeredEvents = {}
+
 function Class:New(type, name)
-	local obj = S:Clone(Class.prototype)
+	local obj = S:DeepClone(Class.prototype)
 	obj.type = type
 	obj.name = name
 	return obj

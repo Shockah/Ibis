@@ -26,9 +26,12 @@ function Addon:OnInitialize()
 	self:RegisterEvent("UNIT_ENTERED_VEHICLE")
 	self:RegisterEvent("UNIT_EXITED_VEHICLE")
 
+	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+
 	Addon.AuraTracker.__Private:Register()
 	Addon.HealthTracker.__Private:Register()
 	Addon.LevelTracker.__Private:Register()
+	Addon.PostCastTimerTracker.__Private:Register()
 	Addon.PowerTracker.__Private:Register()
 	Addon.ReputationTracker.__Private:Register()
 	Addon.TotemTracker.__Private:Register()
@@ -159,6 +162,14 @@ end
 
 function Addon:UNIT_EXITED_VEHICLE(event)
 	self:SetupAllActionButtons()
+end
+
+function Addon:UNIT_SPELLCAST_SUCCEEDED(event, unitID, spell, rank, lineID, spellID)
+	for _, tracker in pairs(self.allTrackers) do
+		if S:Contains(tracker.factory.registeredEvents, event) then
+			tracker[event](tracker, event, unitID, spell, rank, lineID, spellID)
+		end
+	end
 end
 
 function Addon:RegisterActionButtonHandler(func)
