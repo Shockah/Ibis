@@ -8,11 +8,13 @@ local BaseAddon = _G[S:Split(addonName, "_")[1]]
 function Addon:OnInitialize()
 	local factory = BaseAddon.IndicatorFactory:New("roundHighlight", "Round Highlight")
 
-	function factory:CreateBlankConfig(configAddon, tracker)
+	function factory:CreateBlankConfig(tracker)
 		local r, g, b = 1.0, 1.0, 1.0
-		local icon = tracker:GetIcon(false)
-		if icon then
-			r, g, b = configAddon.Niji.GetIconColor(icon, r, g, b)
+		if tracker then
+			local icon = tracker:GetIcon(false)
+			if icon then
+				r, g, b = BaseAddon.Niji.GetIconColor(icon, r, g, b)
+			end
 		end
 		
 		return {
@@ -23,9 +25,7 @@ function Addon:OnInitialize()
 	end
 
 	function factory:Get(action, config, tracker)
-		local indicator = Addon.Indicator:Get(action, config, tracker)
-		indicator.factory = self
-		return indicator
+		return Addon.Indicator:Get(self, action, config, tracker)
 	end
 
 	function factory:Free(indicator)

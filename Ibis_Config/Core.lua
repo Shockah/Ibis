@@ -22,7 +22,7 @@ local optionSelected = nil
 
 function Addon:OnInitialize()
 	table.insert(UISpecialFrames, BaseAddon:GetName().."ConfigFrame")
-	self.Niji = addonTable.Niji
+	BaseAddon.Niji = addonTable.Niji
 
 	local profilesOptions = LibStub("AceDBOptions-3.0"):GetOptionsTable(BaseAddon.db)
 
@@ -205,15 +205,10 @@ function Addon:CreateConfigurationFrame()
 	self:SetupFrame()
 end
 
-function Addon:FrameRefresh()
-	local tracker = type(optionSelected) == "table" and optionSelected or nil
-	self:SetupList()
-	self:UpdateTrackerFrame(self.ConfigFrame.editorTitleGroup, tracker)
-	self:UpdateConfigurationFrame(self.ConfigFrame.editorScroll, tracker)
-end
-
 function Addon:Refresh(tracker)
-	BaseAddon:ReloadSessionTrackers()
+	if tracker then
+		BaseAddon:ReloadSessionTrackers()
+	end
 	self:SetupList()
 	self:UpdateTrackerFrame(self.ConfigFrame.editorTitleGroup, tracker)
 	self:UpdateConfigurationFrame(self.ConfigFrame.editorScroll, tracker)
@@ -503,6 +498,8 @@ function Addon:UpdateConfigurationFrameToSettingsOption(container)
 		BaseAddon:UpdateSettings()
 	end)
 	container:AddChild(hideGlowCheckbox)
+
+	BaseAddon.IndicatorFactory:CreateConfigMenu(self, nil, container)
 end
 
 function Addon:UpdateConfigurationFrameToProfilesOption(container)
@@ -518,10 +515,10 @@ function Addon:UpdateConfigurationFrameToProfilesOption(container)
 end
 
 function Addon:UpdateConfigurationFrame(container, tracker)
-	container:ReleaseChildren()
 	if not tracker then
 		return
 	end
+	container:ReleaseChildren()
 
 	local actionTypes = {
 		"<any>",

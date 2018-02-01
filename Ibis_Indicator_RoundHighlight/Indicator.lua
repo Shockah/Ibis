@@ -22,10 +22,10 @@ local defaultTexCoord = {
 	LRx = 1, LRy = 1,
 }
 
-function Class:Get(action, config, tracker)
+function Class:Get(factory, action, config, tracker)
 	local obj
 	if S:IsEmpty(free) then
-		obj = Private:Create(action, config, tracker)
+		obj = Private:Create(factory, action, config, tracker)
 	else
 		obj = free[1]
 		table.remove(free, 1)
@@ -47,9 +47,10 @@ function Instance:Free()
 	table.insert(free, self)
 end
 
-function Private:Create(action, config, tracker)
+function Private:Create(factory, action, config, tracker)
 	local indicator = CreateFrame("frame", nil, action.button or UIParent)
 	S:CloneInto(Instance, indicator)
+	indicator.factory = factory
 
 	indicator.textures = {}
 	indicator.coords = {}
@@ -291,6 +292,10 @@ function Instance:SetAngle(angle1, angle2)
 	end
 end
 
+function Instance:GetConfig(config, key, default)
+	return self.factory:GetConfig(config, key, default)
+end
+
 function Instance:Setup(action, config, tracker)
 	self.config = config
 	self.action = action
@@ -299,13 +304,13 @@ function Instance:Setup(action, config, tracker)
 	self:ClearAllPoints()
 	self:SetPoint("CENTER", action.button, "CENTER")
 	
-	self:SetTexture(config.texture or action.button.Border:GetTexture())
-	self:SetBlendMode(config.blendMode or "ADD")
-	self:SetFrameStrata(config.strata or "MEDIUM")
-	self:SetDrawLayer(config.layer or "BORDER")
+	self:SetTexture(self:GetConfig(config, "texture", action.button.Border:GetTexture()))
+	self:SetBlendMode(self:GetConfig(config, "blendMode", "ADD"))
+	self:SetFrameStrata(self:GetConfig(config, "strata", "MEDIUM"))
+	self:SetDrawLayer(self:GetConfig(config, "layer", "BORDER"))
 
 	local function OnUpdate(self)
-		local scale = config.scale or 1.0
+		local scale = self:GetConfig(config, "scale", 1.0)
 		scale = scale * action.button:GetScale()
 		self:SetSize(action.button:GetWidth() * scale, action.button:GetHeight() * scale)
 
@@ -336,7 +341,7 @@ function Instance:UpdateAngle(current, maximum)
 		local f = current / maximum
 		local angle = (1.0 - f) * 360
 
-		local initialAngle = self.config.initialAngle or 0
+		local initialAngle = self:GetConfig(config, "initialAngle", 0)
 		self:SetAngle(initialAngle + angle / 2.0, initialAngle + 360 - angle / 2.0)
 	else
 		self:ClearAngle()

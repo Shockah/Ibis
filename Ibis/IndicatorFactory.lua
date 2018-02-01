@@ -50,49 +50,60 @@ function Class:CreateConfigMenu(configAddon, tracker, container)
 	local AceGUI = LibStub("AceGUI-3.0")
 
 	local indicatorsHeading = AceGUI:Create("Heading")
-	indicatorsHeading:SetText("Indicators")
+	indicatorsHeading:SetText(tracker and "Indicators" or "Indicators - defaults")
 	indicatorsHeading:SetFullWidth(true)
 	container:AddChild(indicatorsHeading)
 
-	for _, indicatorConfig in pairs(tracker.indicatorConfigs) do
-		local group = AceGUI:Create("InlineGroup")
-		group:SetTitle(factories[indicatorConfig.type].name)
-		group:SetFullWidth(true)
-		container:AddChild(group)
+	if tracker then
+		for _, indicatorConfig in pairs(tracker.indicatorConfigs) do
+			local group = AceGUI:Create("InlineGroup")
+			group:SetTitle(factories[indicatorConfig.type].name)
+			group:SetFullWidth(true)
+			container:AddChild(group)
 
-		factories[indicatorConfig.type]:CreateConfigMenu(configAddon, tracker, group, indicatorConfig)
+			factories[indicatorConfig.type]:CreateConfigMenu(configAddon, tracker, group, indicatorConfig)
 
-		local removeButton = AceGUI:Create("Button")
-		removeButton:SetText("Remove")
-		removeButton:SetFullWidth(true)
-		removeButton:SetCallback("OnClick", function(self, event)
-			S:RemoveValue(tracker.indicatorConfigs, indicatorConfig)
-			configAddon:Refresh(tracker)
+			local removeButton = AceGUI:Create("Button")
+			removeButton:SetText("Remove")
+			removeButton:SetFullWidth(true)
+			removeButton:SetCallback("OnClick", function(self, event)
+				S:RemoveValue(tracker.indicatorConfigs, indicatorConfig)
+				configAddon:Refresh(tracker)
+			end)
+			group:AddChild(removeButton)
+		end
+
+		local sortedFactories = S:Clone(factories)
+		table.sort(sortedFactories, function(a, b)
+			return a.name < b.name
 		end)
-		group:AddChild(removeButton)
-	end
 
-	local sortedFactories = S:Clone(factories)
-	table.sort(sortedFactories, function(a, b)
-		return a.name < b.name
-	end)
+		for _, factory in pairs(sortedFactories) do
+			local addIndicatorButton = AceGUI:Create("Button")
+			addIndicatorButton:SetText("Add "..factory.name)
+			addIndicatorButton:SetFullWidth(true)
+			addIndicatorButton:SetCallback("OnClick", function(self, event)
+				table.insert(tracker.indicatorConfigs, factory:CreateBlankConfig(tracker))
+				configAddon:Refresh(tracker)
+			end)
+			container:AddChild(addIndicatorButton)
+		end
+	else
+		for _, factory in pairs(factories) do
+			local group = AceGUI:Create("InlineGroup")
+			group:SetTitle(factory.name)
+			group:SetFullWidth(true)
+			container:AddChild(group)
 
-	for _, factory in pairs(sortedFactories) do
-		local addIndicatorButton = AceGUI:Create("Button")
-		addIndicatorButton:SetText("Add "..factory.name)
-		addIndicatorButton:SetFullWidth(true)
-		addIndicatorButton:SetCallback("OnClick", function(self, event)
-			table.insert(tracker.indicatorConfigs, factory:CreateBlankConfig(configAddon, tracker))
-			configAddon:Refresh(tracker)
-		end)
-		container:AddChild(addIndicatorButton)
+			factory:CreateConfigMenu(configAddon, nil, group, factory:GetDefaultConfig())
+		end
 	end
 end
 
 function Class:CreateColorConfigMenu(configAddon, tracker, container, tbl, label)
 	local AceGUI = LibStub("AceGUI-3.0")
 
-	local providedExtraDataColors = tracker:ProvidedExtraDataColors()
+	local providedExtraDataColors = tracker and tracker:ProvidedExtraDataColors() or nil
 	local hasExtra = providedExtraDataColors and not S:IsEmpty(providedExtraDataColors)
 
 	local group
@@ -184,7 +195,33 @@ function Class:CreateColorConfigMenu(configAddon, tracker, container, tbl, label
 	pulseGroup:AddChild(pulseFactorSlider)
 end
 
-function Instance:CreateBlankConfig(configAddon, tracker)
+function Instance:GetDefaultConfig()
+	if not Addon.db.profile.defaultConfig then
+		Addon.db.profile.defaultConfig = {}
+	end
+
+	local config = Addon.db.profile.defaultConfig[self.type]
+	if not config then
+		config = self:CreateBlankConfig(nil)
+		Addon.db.profile.defaultConfig[self.type] = config
+	end
+	return config
+end
+
+function Instance:GetConfig(config, key, default)
+	if config and config[key] then
+		return config[key]
+	end
+
+	local defaultConfig = self:GetDefaultConfig()
+	if defaultConfig and defaultConfig[key] then
+		return default[key]
+	end
+
+	return default
+end
+
+function Instance:CreateBlankConfig(tracker)
 	return nil
 end
 
