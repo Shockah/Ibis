@@ -455,6 +455,7 @@ function Addon:UpdateConfigurationFrameToSettingsOption(container)
 
 	local hideGlowCheckbox = AceGUI:Create("CheckBox")
 	hideGlowCheckbox:SetLabel("Hide action button glow")
+	hideGlowCheckbox:SetDescription("Currently only working with action buttons using LibButtonGlow (for example Bartender).")
 	hideGlowCheckbox:SetValue(BaseAddon.db.profile.hideGlow)
 	hideGlowCheckbox:SetFullWidth(true)
 	hideGlowCheckbox:SetCallback("OnValueChanged", function(self, event, value)
