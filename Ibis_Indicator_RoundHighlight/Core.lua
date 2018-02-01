@@ -65,16 +65,39 @@ function Addon:OnInitialize()
 			"DISABLE",
 		}
 
+		local textureGroup = AceGUI:Create("InlineGroup")
+		textureGroup:SetLayout("Flow")
+		textureGroup:SetTitle("Texture")
+		textureGroup:SetFullWidth(true)
+		container:AddChild(textureGroup)
+
 		local textureEditbox = AceGUI:Create("EditBox")
-		textureEditbox:SetLabel("Texture (optional)")
-		textureEditbox:SetText(indicatorConfig.texture or "")
+		textureEditbox:SetText(indicatorConfig.texture or "<use the button border texture>")
 		textureEditbox:SetFullWidth(true)
 		textureEditbox:SetCallback("OnEnterPressed", function(self, event, text)
 			indicatorConfig.texture = S:StringOrNil(text)
 			self:ClearFocus()
 			configAddon:Refresh(tracker)
 		end)
-		container:AddChild(textureEditbox)
+		textureGroup:AddChild(textureEditbox)
+
+		local borderTextureButton = AceGUI:Create("Button")
+		borderTextureButton:SetText("Button border")
+		borderTextureButton:SetRelativeWidth(0.5)
+		borderTextureButton:SetCallback("OnClick", function(self, event)
+			indicatorConfig.texture = nil
+			configAddon:Refresh(tracker)
+		end)
+		textureGroup:AddChild(borderTextureButton)
+
+		local vanillaTextureButton = AceGUI:Create("Button")
+		vanillaTextureButton:SetText("Vanilla")
+		vanillaTextureButton:SetRelativeWidth(0.5)
+		vanillaTextureButton:SetCallback("OnClick", function(self, event)
+			indicatorConfig.texture = "Interface/BUTTONS/UI-ActionButton-Border"
+			configAddon:Refresh(tracker)
+		end)
+		textureGroup:AddChild(vanillaTextureButton)
 
 		local scaleSlider = AceGUI:Create("Slider")
 		scaleSlider:SetLabel("Scale")
