@@ -686,6 +686,18 @@ function Addon:CreateRaceConfigurationFrame(container, tracker)
 	innerGroup2:SetFullWidth(true)
 	group:AddChild(innerGroup2)
 
+	local separator2 = AceGUI:Create("SimpleGroup")
+	separator2:SetLayout("List")
+	separator2:SetFullWidth(true)
+	separator2:SetAutoAdjustHeight(false)
+	separator2:SetHeight(8)
+	group:AddChild(separator2)
+
+	local innerGroup3 = AceGUI:Create("SimpleGroup")
+	innerGroup3:SetLayout("Flow")
+	innerGroup3:SetFullWidth(true)
+	group:AddChild(innerGroup3)
+
 	local races = {
 		{
 			id = "Pandaren",
@@ -741,37 +753,65 @@ function Addon:CreateRaceConfigurationFrame(container, tracker)
 		},
 	}
 
-	for i = 0, #races do
-		local specificGroup = i <= 1 and innerGroup1 or innerGroup2
+	local alliedRaces = {
+		{
+			id = "LightforgedDraenei",
+			localized = "Lightforged Draenei",
+		},
+		{
+			id = "HighmountainTauren",
+			localized = "Highmountain Tauren",
+		},
+		{
+			id = "VoidElf",
+			localized = "Void Elf",
+		},
+		{
+			id = "Nightborne",
+			localized = "Nightborne",
+		},
+	}
+
+	local function setupRace(race, specificGroup)
 		local raceCheckbox = AceGUI:Create("CheckBox")
 		raceCheckbox:SetRelativeWidth(0.5)
 		specificGroup:AddChild(raceCheckbox)
 
-		if i == 0 then
-			raceCheckbox:SetLabel("Any")
-			raceCheckbox:SetValue(tracker.race == nil)
-			raceCheckbox:SetCallback("OnValueChanged", function(self, event, value)
-				tracker.race = nil
-				Addon:Refresh(tracker)
-			end)
-		else
-			raceCheckbox:SetLabel(races[i].localized)
-			raceCheckbox:SetValue(tracker.race and S:Contains(tracker.race, races[i].id))
+		if race then
+			raceCheckbox:SetLabel(race.localized)
+			raceCheckbox:SetValue(tracker.race and S:Contains(tracker.race, race.id))
 			raceCheckbox:SetCallback("OnValueChanged", function(self, event, value)
 				if value then
 					if tracker.race == nil then
 						tracker.race = {}
 					end
-					table.insert(tracker.race, races[i].id)
+					table.insert(tracker.race, race.id)
 				else
-					S:RemoveValue(tracker.race, races[i].id)
+					S:RemoveValue(tracker.race, race.id)
 					if S:IsEmpty(tracker.race) then
 						tracker.race = nil
 					end
 				end
 				Addon:Refresh(tracker)
 			end)
+		else
+			raceCheckbox:SetLabel("Any")
+			raceCheckbox:SetValue(tracker.race == nil)
+			raceCheckbox:SetCallback("OnValueChanged", function(self, event, value)
+				tracker.race = nil
+				Addon:Refresh(tracker)
+			end)
 		end
+	end
+
+	setupRace(nil, innerGroup1)
+	setupRace(races[1], innerGroup1)
+
+	for i = 2, #races do
+		setupRace(races[i], innerGroup2)
+	end
+	for i = 1, #alliedRaces do
+		setupRace(alliedRaces[i], innerGroup3)
 	end
 end
 
