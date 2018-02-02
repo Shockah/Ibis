@@ -604,6 +604,7 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 	removeButton:SetCallback("OnClick", function(self, event)
 		S:RemoveValue(BaseAddon.allTrackers, tracker)
 		optionSelected = nil
+		BaseAddon:ReloadSessionTrackers()
 		Addon:SetupFrame()
 	end)
 	actionsGroup:AddChild(removeButton)
