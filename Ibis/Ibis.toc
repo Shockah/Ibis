@@ -25,5 +25,6 @@ Trackers/PostCastTimerTracker.lua
 Trackers/PowerTracker.lua
 Trackers/ReputationTracker.lua
 Trackers/TotemTracker.lua
+Trackers/Modifiers/AlwaysActiveTracker.lua
 Trackers/Modifiers/ExistsTracker.lua
 Trackers/Modifiers/ReverseTracker.lua

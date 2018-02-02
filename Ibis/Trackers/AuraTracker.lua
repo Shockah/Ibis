@@ -190,5 +190,5 @@ function Instance:GetValue()
 		end
 	end
 
-	return nil, nil
+	return nil, self.stacks
 end

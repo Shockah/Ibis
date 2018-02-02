@@ -11,7 +11,18 @@ function Addon:OnInitialize()
 
 	function factory:CreateBlankConfig(configAddon, tracker)
 		local config = self.baseFactory:CreateBlankConfig(configAddon, tracker)
+
 		config.type = self.type
+
+		local color = BaseAddon:ParseColorConfig(config, nil, true)
+		for i = 1, 3 do
+			color[i] = color[i] * 0.25
+		end
+		color[4] = color[4] * 0.5
+		config.inactive = {
+			rgba = color,
+		}
+
 		return config
 	end
 

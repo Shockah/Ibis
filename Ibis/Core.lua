@@ -39,6 +39,7 @@ function Addon:OnInitialize()
 
 	Addon.ExistsTracker.__Private:Register()
 	Addon.ReverseTracker.__Private:Register()
+	Addon.AlwaysActiveTracker.__Private:Register()
 
 	self.defaultTrackerConfigs = {}
 
