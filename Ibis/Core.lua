@@ -37,9 +37,9 @@ function Addon:OnInitialize()
 	Addon.ReputationTracker.__Private:Register()
 	Addon.TotemTracker.__Private:Register()
 
+	Addon.AlwaysActiveTracker.__Private:Register()
 	Addon.ExistsTracker.__Private:Register()
 	Addon.ReverseTracker.__Private:Register()
-	Addon.AlwaysActiveTracker.__Private:Register()
 
 	self.defaultTrackerConfigs = {}
 

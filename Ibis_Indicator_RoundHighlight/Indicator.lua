@@ -96,7 +96,11 @@ function Instance:UpdateAngle(current, maximum)
 		local angle = (1.0 - f) * 360
 
 		local initialAngle = self.config.initialAngle or 0
-		self.highlight:SetAngle(initialAngle + angle / 2.0, initialAngle + 360 - angle / 2.0)
+		if f <= 0 then
+			self.highlight:ClearAngle()
+		else
+			self.highlight:SetAngle(initialAngle + angle / 2.0, initialAngle + 360 - angle / 2.0)
+		end
 	else
 		self.highlight:ClearAngle()
 	end

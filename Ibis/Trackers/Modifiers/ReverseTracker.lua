@@ -43,11 +43,11 @@ function Instance:GetValue()
 		if not current then
 			return 1, 1
 		else
-			return nil, nil
+			return nil, maximum or 1.0
 		end
 	else
 		if not current then
-			return nil, nil
+			return nil, maximum or 1.0
 		else
 			return maximum - current, maximum
 		end

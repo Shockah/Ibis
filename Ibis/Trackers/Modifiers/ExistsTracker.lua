@@ -21,6 +21,7 @@ end
 
 function Private:Register()
 	Private.factory = Addon.TrackerFactory:New("exists", "Exists")
+	Private.factory.priority = 1
 
 	function Private.factory:Create(tracker)
 		return Class:New(
@@ -40,7 +41,7 @@ end
 function Instance:GetValue()
 	local current, maximum = self.tracker:GetValue()
 	if not current then
-		return nil, nil
+		return nil, maximum or 1.0
 	else
 		return maximum, maximum
 	end

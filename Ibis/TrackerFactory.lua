@@ -4,7 +4,9 @@ local Addon = _G[addonName]
 local S = LibStub:GetLibrary("ShockahUtils")
 
 local Class = {
-	prototype = {},
+	prototype = {
+		priority = 0,
+	},
 }
 Addon.TrackerFactory = Class
 local Instance = Class.prototype
@@ -43,7 +45,15 @@ function Class:Instantiate(config)
 	if tracker then
 		tracker.factory = factory
 
-		for _, modifierFactory in pairs(modifierFactories) do
+		local sortedFactories = S:Values(modifierFactories)
+		table.sort(sortedFactories, function(a, b)
+			if a.priority ~= b.priority then
+				return a.priority > b.priority
+			end
+			return a.name < b.name
+		end)
+
+		for _, modifierFactory in pairs(sortedFactories) do
 			if config.track[modifierFactory.type] then
 				tracker = modifierFactory:Create(tracker)
 				tracker.factory = modifierFactory
@@ -146,12 +156,20 @@ function Class:CreateConfigMenuForModifiers(configAddon, tracker, container)
 	modifiersHeading:SetFullWidth(true)
 	container:AddChild(modifiersHeading)
 
+	local sortedFactories = S:Values(modifierFactories)
+	table.sort(sortedFactories, function(a, b)
+		if a.priority ~= b.priority then
+			return a.priority > b.priority
+		end
+		return a.name < b.name
+	end)
+
 	local group = AceGUI:Create("SimpleGroup")
 	group:SetLayout("Flow")
 	group:SetFullWidth(true)
 	container:AddChild(group)
 
-	for _, modifierFactory in pairs(modifierFactories) do
+	for _, modifierFactory in pairs(sortedFactories) do
 		local modifierCheckbox = AceGUI:Create("CheckBox")
 		modifierCheckbox:SetLabel(modifierFactory.name)
 		modifierCheckbox:SetValue(tracker:HasModifier(modifierFactory))

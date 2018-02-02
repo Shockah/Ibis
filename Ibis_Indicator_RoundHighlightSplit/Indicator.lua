@@ -58,6 +58,10 @@ function Instance:Setup(action, config, tracker)
 	self:ClearAllPoints()
 	self:SetPoint("CENTER", action.button, "CENTER")
 
+	for _, highlight in pairs(self.highlights) do
+		self:SetupHighlight(highlight)
+	end
+
 	local function OnUpdate(self)
 		local scale = self.config.scale or 1.0
 		scale = scale * self.action.button:GetScale()
