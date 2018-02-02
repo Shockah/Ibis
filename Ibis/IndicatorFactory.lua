@@ -5,11 +5,12 @@ local S = LibStub:GetLibrary("ShockahUtils")
 
 local Class = {
 	prototype = {},
+	factories = {},
 }
 Addon.IndicatorFactory = Class
 local Instance = Class.prototype
 
-local factories = {}
+local factories = Class.factories
 
 function Class:New(type, name)
 	local obj = S:Clone(Class.prototype)

@@ -106,7 +106,7 @@ function Private:Register()
 		container:AddChild(buffCheckbox)
 
 		local stacksEditbox = AceGUI:Create("EditBox")
-		stacksEditbox:SetLabel("Stacks (optional)")
+		stacksEditbox:SetLabel("Max stacks (optional)")
 		stacksEditbox:SetText(tracker.stacks or "")
 		stacksEditbox:SetFullWidth(true)
 		stacksEditbox:SetCallback("OnEnterPressed", function(self, event, text)

@@ -33,6 +33,11 @@ function Addon:OnInitialize()
 	end
 
 	function factory:CreateConfigMenu(configAddon, tracker, container, indicatorConfig)
+		self:AddBaseConfig(configAddon, tracker, container, indicatorConfig)
+		self:AddColorConfig(configAddon, tracker, container, indicatorConfig)
+	end
+
+	function factory:AddBaseConfig(configAddon, tracker, container, indicatorConfig)
 		local AceGUI = LibStub("AceGUI-3.0")
 
 		local stratas = {
@@ -155,8 +160,6 @@ function Addon:OnInitialize()
 		end)
 		container:AddChild(blendModeDropdown)
 
-		BaseAddon.IndicatorFactory:CreateColorConfigMenu(configAddon, tracker, container, indicatorConfig, "Color")
-
 		local initialAngleSlider = AceGUI:Create("Slider")
 		initialAngleSlider:SetLabel("Angle")
 		initialAngleSlider:SetSliderValues(0, 360, 1)
@@ -170,6 +173,10 @@ function Addon:OnInitialize()
 			configAddon:Refresh(tracker)
 		end)
 		container:AddChild(initialAngleSlider)
+	end
+
+	function factory:AddColorConfig(configAddon, tracker, container, indicatorConfig)
+		BaseAddon.IndicatorFactory:CreateColorConfigMenu(configAddon, tracker, container, indicatorConfig, "Color")
 	end
 
 	BaseAddon:RegisterIndicatorFactory(factory)

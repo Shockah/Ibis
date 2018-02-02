@@ -8,3 +8,4 @@
 # Addon code
 Core.lua
 Indicator.lua
+RoundHighlight.lua
