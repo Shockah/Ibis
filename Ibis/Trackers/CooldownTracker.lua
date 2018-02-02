@@ -42,6 +42,8 @@ function Private:Register()
 			track.trackerActionType
 		)
 
+		tracker.charges = track.charges
+
 		return tracker
 	end
 
@@ -101,7 +103,7 @@ function Private:Register()
 		chargesCheckbox:SetValue(tracker.charges)
 		chargesCheckbox:SetFullWidth(true)
 		chargesCheckbox:SetCallback("OnValueChanged", function(self, event, value)
-			tracker.charges = value
+			tracker.charges = value or nil
 			configAddon:Refresh(tracker)
 		end)
 		container:AddChild(chargesCheckbox)
