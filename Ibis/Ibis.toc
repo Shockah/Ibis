@@ -18,6 +18,7 @@ IndicatorFactory.lua
 Tracker.lua
 TrackerFactory.lua
 Trackers/AuraTracker.lua
+Trackers/CooldownTracker.lua
 Trackers/HealthTracker.lua
 Trackers/LevelTracker.lua
 Trackers/PostCastTimerTracker.lua

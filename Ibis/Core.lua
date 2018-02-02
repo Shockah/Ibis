@@ -29,6 +29,7 @@ function Addon:OnInitialize()
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 
 	Addon.AuraTracker.__Private:Register()
+	Addon.CooldownTracker.__Private:Register()
 	Addon.HealthTracker.__Private:Register()
 	Addon.LevelTracker.__Private:Register()
 	Addon.PostCastTimerTracker.__Private:Register()
