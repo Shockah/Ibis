@@ -73,6 +73,29 @@ function Addon:OnInitialize()
 			configAddon:Refresh(tracker)
 		end)
 		container:AddChild(emptySpaceDegreesSlider)
+
+		local endSpaceCheckbox = AceGUI:Create("CheckBox")
+		endSpaceCheckbox:SetLabel("Space at the end")
+		endSpaceCheckbox:SetValue(indicatorConfig.endSpace ~= false)
+		endSpaceCheckbox:SetFullWidth(true)
+		endSpaceCheckbox:SetCallback("OnValueChanged", function(self, event, value)
+			if value then
+				value = nil
+			end
+			indicatorConfig.endSpace = value
+			configAddon:Refresh(tracker)
+		end)
+		container:AddChild(endSpaceCheckbox)
+
+		local reverseStackDirectionCheckhox = AceGUI:Create("CheckBox")
+		reverseStackDirectionCheckhox:SetLabel("Reverse stack direction")
+		reverseStackDirectionCheckhox:SetValue(indicatorConfig.reverseStacks)
+		reverseStackDirectionCheckhox:SetFullWidth(true)
+		reverseStackDirectionCheckhox:SetCallback("OnValueChanged", function(self, event, value)
+			indicatorConfig.reverseStacks = value or nil
+			configAddon:Refresh(tracker)
+		end)
+		container:AddChild(reverseStackDirectionCheckhox)
 	end
 
 	function factory:AddColorConfig(configAddon, tracker, container, indicatorConfig)

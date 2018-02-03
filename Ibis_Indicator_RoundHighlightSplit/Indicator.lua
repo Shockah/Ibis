@@ -129,19 +129,26 @@ function Instance:Update(current, maximum, activeColor, inactiveColor)
 		return
 	end
 
-	if current then
+	if current and maximum then
 		local initialAngle = self.config.initialAngle or 0
+		local fullAngle = self.config.fullAngle or 360
 		local spaceAngle = self.config.spaceAngle or 20
 		local singleAngle = self.config.stackAngle
+		local endSpace = self.config.endSpace ~= false
+		local reverseStacks = self.config.reverseStacks
 
-		if not singleAngle then
-			singleAngle = (360 - spaceAngle * maximum) / maximum
+		if not singleAngle or singleAngle <= 0 then
+			singleAngle = (fullAngle - spaceAngle * (maximum - (endSpace and 0 or 1))) / maximum
 		end
 
+		local totalWidth = singleAngle * maximum + spaceAngle * (maximum - (endSpace and 0 or 1))
+		local offset = -totalWidth / 2 + singleAngle / 2
+
 		for index, highlight in pairs(self.highlights) do
+			local actualIndex = (reverseStacks and (maximum - index + 1) or index)
 			local active = current >= index
 			local color = active and activeColor or inactiveColor
-			self:UpdateHighlight(highlight, initialAngle + (spaceAngle + singleAngle) * (index - 1), singleAngle, color)
+			self:UpdateHighlight(highlight, initialAngle + offset + (spaceAngle + singleAngle) * (actualIndex - 1), singleAngle, color)
 		end
 	else
 		for _, highlight in pairs(self.highlights) do

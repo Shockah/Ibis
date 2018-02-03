@@ -92,14 +92,20 @@ function Instance:UpdateAngle(current, maximum)
 
 	local current, maximum = self.tracker:GetValue()
 	if current then
+		local initialAngle = self.config.initialAngle or 0
+		local fullAngle = self.config.fullAngle or 360
+		local fillMode = self.config.fillMode or 0
+
+		initialAngle = initialAngle + fullAngle * fillMode
+
 		local f = current / maximum
+		f = f * (fullAngle / 360)
 		local angle = (1.0 - f) * 360
 
-		local initialAngle = self.config.initialAngle or 0
 		if f <= 0 then
 			self.highlight:ClearAngle()
 		else
-			self.highlight:SetAngle(initialAngle + angle / 2.0, initialAngle + 360 - angle / 2.0)
+			self.highlight:SetAngle(initialAngle + angle / 2.0 + angle * fillMode, initialAngle + 360 - angle / 2.0 + angle * fillMode)
 		end
 	else
 		self.highlight:ClearAngle()

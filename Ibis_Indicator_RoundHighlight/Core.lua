@@ -34,6 +34,7 @@ function Addon:OnInitialize()
 
 	function factory:CreateConfigMenu(configAddon, tracker, container, indicatorConfig)
 		self:AddBaseConfig(configAddon, tracker, container, indicatorConfig)
+		self:AddSpecificConfig(configAddon, tracker, container, indicatorConfig)
 		self:AddColorConfig(configAddon, tracker, container, indicatorConfig)
 	end
 
@@ -173,6 +174,50 @@ function Addon:OnInitialize()
 			configAddon:Refresh(tracker)
 		end)
 		container:AddChild(initialAngleSlider)
+
+		local fullDegreesSlider = AceGUI:Create("Slider")
+		fullDegreesSlider:SetLabel("Degrees while full")
+		fullDegreesSlider:SetSliderValues(0, 360, 1)
+		fullDegreesSlider:SetValue(indicatorConfig.fullAngle or 360)
+		fullDegreesSlider:SetFullWidth(true)
+		fullDegreesSlider:SetCallback("OnMouseUp", function(self, event, value)
+			if value == 360 then
+				value = nil
+			end
+			indicatorConfig.fullAngle = value
+			configAddon:Refresh(tracker)
+		end)
+		container:AddChild(fullDegreesSlider)
+	end
+
+	function factory:AddSpecificConfig(configAddon, tracker, container, indicatorConfig)
+		local AceGUI = LibStub("AceGUI-3.0")
+
+		local fillMode = {
+			"centered",
+			"clockwise",
+			"counter-clockwise",
+		}
+		local fillModeValues = {
+			0,
+			0.5,
+			-0.5,
+		}
+
+		local fillModeDropdown = AceGUI:Create("Dropdown")
+		fillModeDropdown:SetLabel("Fill mode")
+		fillModeDropdown:SetList(fillMode)
+		fillModeDropdown:SetValue(S:KeyOf(fillModeValues, indicatorConfig.fillMode or fillModeValues[1]))
+		fillModeDropdown:SetFullWidth(true)
+		fillModeDropdown:SetCallback("OnValueChanged", function(self, event, key)
+			local value = fillModeValues[key]
+			if value == fillModeValues[1] then
+				value = nil
+			end
+			indicatorConfig.fillMode = value
+			configAddon:Refresh(tracker)
+		end)
+		container:AddChild(fillModeDropdown)
 	end
 
 	function factory:AddColorConfig(configAddon, tracker, container, indicatorConfig)

@@ -173,7 +173,7 @@ function Private:CreateTexCoord(texture)
 	local pointOrder = { "LL", "UL", "UR", "LR", "LL", "UL", "UR", "LR", "LL", "UL", "UR", "LR" }
 
 	function coord:SetAngle(angle1, angle2)
-		local index = floor((angle1 + 45) / 90)
+		local index = floor((angle1 + 45) / 90) % #pointOrder
 
 		local middleCorner = pointOrder[index + 1]
 		local startCorner = pointOrder[index + 2]
@@ -186,7 +186,7 @@ function Private:CreateTexCoord(texture)
 		self:MoveCorner(startCorner, angleToCoord(angle1))
 
 		local edge1 = floor((angle1 - 45) / 90)
-		local edge2 = floor((angle2 -45) / 90)
+		local edge2 = floor((angle2 - 45) / 90)
 
 		if edge1 == edge2 then
 			self:MoveCorner(endCorner1, angleToCoord(angle2))
@@ -238,6 +238,11 @@ function Instance:ClearAngle()
 end
 
 function Instance:SetAngle(angle1, angle2)
+	while angle1 < 0 or angle2 < 0 do
+		angle1 = angle1 + 360
+		angle2 = angle2 + 360
+	end
+
 	local scalex = 1.4142
 	local scaley = 1.4142
 	local rotate = 0
