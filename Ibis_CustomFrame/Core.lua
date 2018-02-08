@@ -6,7 +6,6 @@ local S = LibStub:GetLibrary("ShockahUtils")
 local BaseAddon = _G[S:Split(addonName, "_")[1]]
 
 local frames = {}
-local checkFramesOnce = true
 
 local function IsWidget(value)
 	if not value then
@@ -26,13 +25,11 @@ function Addon:OnInitialize()
 	BaseAddon:RegisterDeserializeDelegate(function()
 		Addon:ResetupAllFrameIndicators()
 
-		if checkFramesOnce then
-			for _, tracker in pairs(BaseAddon.trackers) do
-				if tracker.frameType.type == "frame" and tracker.frameName then
-					local frame = _G[tracker.frameName]
-					if IsWidget(frame) then
-						Addon:SetupFrameIfNeeded(frame)
-					end
+		for _, tracker in pairs(BaseAddon.trackers) do
+			if tracker.frameType.type == "frame" and tracker.frameName then
+				local frame = _G[tracker.frameName]
+				if IsWidget(frame) then
+					Addon:SetupFrameIfNeeded(frame)
 				end
 			end
 		end
