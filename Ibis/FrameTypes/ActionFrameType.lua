@@ -70,24 +70,20 @@ function Instance:CreateConfigMenu(configAddon, tracker, container)
 end
 
 function Instance:GetIcon(tracker, withPlaceholderTexture)
-	return BaseAddon.Tracker:GetIcon(tracker.actionType, tracker.actionName, withPlaceholderTexture)
+	return Addon.Tracker:GetIcon(tracker.actionType, tracker.actionName, withPlaceholderTexture)
 end
 
-function Instance:GetName(tracker)
-	if tracker.customName then
-		return tracker.customName
-	end
-
+function Instance:GetNameWithoutType(tracker)
 	local number = tonumber(tracker.actionName)
 	if number then
 		return "Action Button #"..number
 	end
 
-	return tracker.actionName
+	return (tracker.actionName or "<empty>")
 end
 
-function Instance:GetFullName(tracker)
-	return self.name..": "..self:GetName(tracker)
+function Instance:GetName(tracker)
+	return self:GetNameWithoutType(tracker)
 end
 
 function Instance:Serialize(tracker, output)

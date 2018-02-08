@@ -24,7 +24,7 @@ function Class:Get(parentFrame, action, config, tracker)
 		table.remove(free, 1)
 		obj:SetParent(parentFrame)
 	end
-	obj:Setup(action, config, tracker)
+	obj:Setup(parentFrame, action, config, tracker)
 	return obj
 end
 

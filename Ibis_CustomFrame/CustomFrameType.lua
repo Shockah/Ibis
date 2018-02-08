@@ -14,7 +14,7 @@ local Private = {}
 Class["__Private"] = Private
 
 function Class:New(type, name)
-	local obj = Addon.FrameType:New(type, name)
+	local obj = BaseAddon.FrameType:New(type, name)
 	S:CloneInto(Class.prototype, obj)
 	return obj
 end
@@ -50,8 +50,8 @@ function Instance:CreateConfigMenu(configAddon, tracker, container)
 	container:AddChild(frameNameEditbox)
 end
 
-function Instance:GetFullName(tracker)
-	return self.name..": "..tracker.frameName
+function Instance:GetName(tracker)
+	return self.name..": "..(tracker.frameName or "<empty>")
 end
 
 function Instance:Serialize(tracker, output)

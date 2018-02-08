@@ -12,7 +12,10 @@ function Addon:OnInitialize()
 
 	hooksecurefunc("CreateFrame", function(type, name, ...)
 		if name then
-			Addon:SetupFrameIfNeeded(_G[name])
+			local frame = _G[name]
+			if frame then
+				Addon:SetupFrameIfNeeded(_G[name])
+			end
 		end
 	end)
 

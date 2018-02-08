@@ -19,13 +19,11 @@ function Class:New(type, name)
 end
 
 function Class:Register(factory)
-	factories[factory.type] = factory
+	factories[factory.type or ""] = factory
 end
 
-function Class:GetFactory(type)
-	return S:FilterFirst(factories, function(factory)
-		return factory.type == type
-	end)
+function Class:Get(type)
+	return factories[type or ""]
 end
 
 function Class:CreateConfigMenu(configAddon, tracker, container)
@@ -34,6 +32,7 @@ function Class:CreateConfigMenu(configAddon, tracker, container)
 	end
 
 	local AceGUI = LibStub("AceGUI-3.0")
+	tracker = tracker:GetBase()
 
 	local sortedFactories = S:Values(factories)
 	table.sort(sortedFactories, function(a, b)
@@ -60,8 +59,8 @@ function Class:CreateConfigMenu(configAddon, tracker, container)
 
 	local actionTypeDropdown = AceGUI:Create("Dropdown")
 	actionTypeDropdown:SetLabel("Action type")
-	actionTypeDropdown:SetList(actionTypes)
-	actionTypeDropdown:SetValue(S:KeyOf(actionNames, tracker.actionType or actionTypes[1]))
+	actionTypeDropdown:SetList(actionNames)
+	actionTypeDropdown:SetValue(S:KeyOf(actionTypes, tracker.actionType or actionTypes[1]))
 	actionTypeDropdown:SetFullWidth(true)
 	actionTypeDropdown:SetCallback("OnValueChanged", function(self, event, key)
 		local value = actionTypes[key]
@@ -81,7 +80,7 @@ function Instance:GetIcon(tracker, withPlaceholderTexture)
 	return withPlaceholderTexture and "Interface/Icons/INV_Misc_QuestionMark" or nil
 end
 
-function Instance:GetFullName(tracker)
+function Instance:GetName(tracker)
 	return self.name
 end
 

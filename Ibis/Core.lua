@@ -317,7 +317,7 @@ function Addon:SetupActionButton(action)
 	end
 
 	for _, tracker in pairs(self.trackers) do
-		if tracker.frameType.isActionFrameType and tracker:MatchesAction(action) then
+		if tracker.frameType.isActionFrameType and tracker.frameType:MatchesAction(tracker, action) then
 			for _, indicatorConfig in pairs(tracker.indicatorConfigs) do
 				local indicator = Addon.IndicatorFactory:Instantiate(action.button, action, indicatorConfig, tracker)
 				if indicator then

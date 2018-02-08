@@ -21,7 +21,7 @@ local flyoutTextures = {
 function Class:New(actionType)
 	local obj = S:Clone(Class.prototype)
 	obj.customName = nil
-	obj.acrionType = actionType
+	obj.actionType = actionType
 	obj.faction = nil
 	obj.race = nil
 	obj.class = nil
@@ -34,8 +34,9 @@ function Class:New(actionType)
 	return obj
 end
 
-function Instance:GetFullActionName()
-	return self.frameType:GetFullName(tracker)
+function Instance:GetName()
+	local base = self:GetBase()
+	return base.customName or base.frameType:GetName(base)
 end
 
 function Instance:GetConfigGroupInfo()
@@ -73,6 +74,10 @@ function Class:GetIconForFlyoutId(flyoutId)
 end
 
 function Class:GetIcon(actionType, actionName, withPlaceholderTexture)
+	if not actionName then
+		return withPlaceholderTexture and "Interface/Icons/INV_Misc_QuestionMark" or nil
+	end
+
 	local number = tonumber(actionName)
 	if number then
 		local action = Addon.Action:NewForActionSlot(nil, number)
@@ -112,7 +117,15 @@ function Class:GetIcon(actionType, actionName, withPlaceholderTexture)
 end
 
 function Instance:GetIcon(withPlaceholderTexture)
-	return self.frameType:GetIcon(tracker, withPlaceholderTexture)
+	return self.frameType:GetIcon(self:GetBase(), withPlaceholderTexture)
+end
+
+function Instance:GetBase()
+	if self.tracker then
+		return self.tracker:GetBase()
+	else
+		return self
+	end
 end
 
 function Instance:HasModifier(factory)
@@ -209,10 +222,6 @@ function Instance:ShouldLoadRightNow()
 	end
 
 	return true
-end
-
-function Instance:MatchesAction(action)
-	return self.frameType:MatchesAction(tracker, action)
 end
 
 function Instance:Serialize()

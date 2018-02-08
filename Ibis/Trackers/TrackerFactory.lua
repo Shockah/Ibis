@@ -44,7 +44,6 @@ function Class:Instantiate(config)
 	local tracker = factory:Create(config)
 	if tracker then
 		tracker.factory = factory
-		tracker.frameType = Addon.FrameType:Get(tracker.actionType)
 		tracker.frameType:Deserialize(config, tracker)
 
 		local sortedFactories = S:Values(modifierFactories)
@@ -87,7 +86,7 @@ function Class:Serialize(tracker)
 		track = {},
 		indicators = {},
 	}
-	tracker.frameType:Serialize(tracker, serialized)
+	tracker.frameType:Serialize(tracker:GetBase(), serialized)
 	S:CloneInto(tracker:Serialize(), serialized.track)
 	S:CloneInto(tracker.indicatorConfigs, serialized.indicators)
 

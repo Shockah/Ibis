@@ -26,8 +26,8 @@ function Addon:OnInitialize()
 		return config
 	end
 
-	function factory:Get(action, config, tracker)
-		local indicator = Addon.Indicator:Get(action, config, tracker)
+	function factory:Get(parentFrame, action, config, tracker)
+		local indicator = Addon.Indicator:Get(parentFrame, action, config, tracker)
 		indicator.factory = self
 		return indicator
 	end
