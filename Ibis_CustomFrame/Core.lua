@@ -6,37 +6,71 @@ local S = LibStub:GetLibrary("ShockahUtils")
 local BaseAddon = _G[S:Split(addonName, "_")[1]]
 
 local frames = {}
+local checkFramesOnce = true
+
+local function IsWidget(value)
+	if not value then
+		return false
+	end
+	if type(value) == "table" then
+		if value.GetName and value.GetObjectType and value.IsObjectType then
+			return true
+		end
+	end
+	return false
+end
 
 function Addon:OnInitialize()
 	Addon.CustomFrameType.__Private:Register()
 
-	hooksecurefunc("CreateFrame", function(type, name, ...)
-		if name then
-			local frame = _G[name]
-			if frame then
-				Addon:SetupFrameIfNeeded(_G[name])
+	BaseAddon:RegisterDeserializeDelegate(function()
+		Addon:ResetupAllFrameIndicators()
+
+		if checkFramesOnce then
+			for _, tracker in pairs(BaseAddon.trackers) do
+				if tracker.frameType.type == "frame" and tracker.frameName then
+					local frame = _G[tracker.frameName]
+					if IsWidget(frame) then
+						Addon:SetupFrameIfNeeded(frame)
+					end
+				end
 			end
 		end
 	end)
+	BaseAddon:RegisterTrackerUpdateDelegate(function(tracker)
+		Addon:ResetupAllFrameIndicators()
+	end)
 
-	for key, value in pairs(_G) do
-		if type(value) == "table" then
-			if value.GetName and value.GetObjectType and value.IsObjectType then
-				self:SetupFrameIfNeeded(frame)
+	hooksecurefunc("CreateFrame", function(type, name, ...)
+		if name then
+			local frame = _G[name]
+			if IsWidget(frame) then
+				Addon:SetupFrameIfNeeded(frame)
 			end
 		end
-	end
+	end)
 end
 
 function Addon:SetupFrameIfNeeded(frame)
+	if frame.IsForbidden then
+		local err, result = pcall(function()
+			return frame:IsForbidden()
+		end)
+		if not err and result then
+			return
+		end
+	end
+
 	for _, tracker in pairs(BaseAddon.trackers) do
 		if tracker.frameType.type == "frame" and tracker.frameName == frame:GetName() then
 			self:SetupFrame(frame)
+			return
 		end
 	end
 end
 
 function Addon:SetupFrame(frame)
+	print("Setting up frame: "..frame:GetName())
 	if not frame[addonName.."hooked"] then
 		frame:HookScript("OnShow", function(self)
 			Addon:SetupFrameIndicators(self)
@@ -47,6 +81,13 @@ function Addon:SetupFrame(frame)
 		frame[addonName.."hooked"] = true
 	end
 	if frame:IsVisible() then
+		self:SetupFrameIndicators(frame)
+	end
+end
+
+function Addon:ResetupAllFrameIndicators()
+	local clonedFrames = S:Clone(frames)
+	for _, frame in pairs(clonedFrames) do
 		self:SetupFrameIndicators(frame)
 	end
 end
@@ -87,8 +128,9 @@ function Addon:CreateFrameIndicators(frame)
 	for _, tracker in pairs(BaseAddon.trackers) do
 		if tracker.frameType.type == "frame" and tracker.frameName == frame:GetName() then
 			for _, indicatorConfig in pairs(tracker.indicatorConfigs) do
-				local indicator = Addon.IndicatorFactory:Instantiate(frame, nil, indicatorConfig, tracker)
+				local indicator = BaseAddon.IndicatorFactory:Instantiate(frame, nil, indicatorConfig, tracker)
 				if indicator then
+					print("adding indicator to "..frame:GetName())
 					AddFrameIndicator(frame, indicator)
 				end
 			end

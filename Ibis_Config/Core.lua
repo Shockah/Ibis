@@ -234,6 +234,10 @@ function Addon:Refresh(tracker)
 	self:SetupList()
 	self:UpdateTrackerFrame(self.ConfigFrame.editorTitleGroup, tracker)
 	self:UpdateConfigurationFrame(self.ConfigFrame.editorScroll, tracker)
+
+	if tracker then
+		BaseAddon:FireTrackerUpdateDelegates(tracker)
+	end
 end
 
 function Addon:SetupFrame()

@@ -49,6 +49,8 @@ function Instance:MatchesAction(tracker, action)
 				return false
 			end
 		end
+	else
+		return false
 	end
 
 	return true

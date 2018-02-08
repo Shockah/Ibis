@@ -13,6 +13,8 @@ Addon.trackers = {}
 
 local actionButtonHandlers = {}
 local indicatorFactories = {}
+local deserializeDelegates = {}
+local trackerUpdateDelegates = {}
 
 local original_Vanilla_ShowOverlayGlow = nil
 local original_LibButtonGlow_ShowOverlayGlow = nil
@@ -90,6 +92,10 @@ function Addon:DeserializeConfig()
 		if ConfigAddon.ConfigFrame then
 			ConfigAddon:CreateConfigurationFrame()
 		end
+	end
+
+	for _, delegate in pairs(deserializeDelegates) do
+		delegate()
 	end
 end
 
@@ -174,6 +180,20 @@ function Addon:UNIT_SPELLCAST_SUCCEEDED(event, unitID, spell, rank, lineID, spel
 			tracker[event](tracker, event, unitID, spell, rank, lineID, spellID)
 		end
 	end
+end
+
+function Addon:FireTrackerUpdateDelegates(tracker)
+	for _, delegate in pairs(trackerUpdateDelegates) do
+		delegate(tracker)
+	end
+end
+
+function Addon:RegisterDeserializeDelegate(func)
+	table.insert(deserializeDelegates, func)
+end
+
+function Addon:RegisterTrackerUpdateDelegate(func)
+	table.insert(trackerUpdateDelegates, func)
 end
 
 function Addon:RegisterActionButtonHandler(func)

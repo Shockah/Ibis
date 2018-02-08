@@ -58,7 +58,7 @@ function Class:CreateConfigMenu(configAddon, tracker, container)
 	end)
 
 	local actionTypeDropdown = AceGUI:Create("Dropdown")
-	actionTypeDropdown:SetLabel("Action type")
+	actionTypeDropdown:SetLabel("Type")
 	actionTypeDropdown:SetList(actionNames)
 	actionTypeDropdown:SetValue(S:KeyOf(actionTypes, tracker.actionType or actionTypes[1]))
 	actionTypeDropdown:SetFullWidth(true)

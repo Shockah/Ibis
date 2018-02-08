@@ -51,7 +51,7 @@ function Instance:CreateConfigMenu(configAddon, tracker, container)
 end
 
 function Instance:GetName(tracker)
-	return self.name..": "..(tracker.frameName or "<empty>")
+	return tracker.frameName or "<empty>"
 end
 
 function Instance:Serialize(tracker, output)
