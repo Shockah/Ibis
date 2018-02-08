@@ -28,6 +28,8 @@ function Addon:OnInitialize()
 
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 
+	Addon.ActionFrameType.__Private:Register()
+
 	Addon.AuraTracker.__Private:Register()
 	Addon.CooldownTracker.__Private:Register()
 	Addon.HealthTracker.__Private:Register()
@@ -191,12 +193,12 @@ function Addon:RegisterTrackerModifierFactory(trackerFactory)
 	self.TrackerFactory:RegisterModifier(trackerFactory)
 end
 
+function Addon:RegisterFrameType(factory)
+	self.FrameType:Register(factory)
+end
+
 function Addon:ParseColorConfig(config, extraDataColors, inConfig)
 	local color = { 1.0, 1.0, 1.0, 1.0 }
-
-	--[[if config.pulsing then
-		color[4] = sin(GetTime() * 720) * 0.25 + 0.75
-	end]]
 
 	if config.rgbi then
 		for i = 1, 3 do
@@ -315,15 +317,13 @@ function Addon:SetupActionButton(action)
 	end
 
 	for _, tracker in pairs(self.trackers) do
-		if tracker:Matches(action) then
+		if tracker.frameType.isActionFrameType and tracker:MatchesAction(action) then
 			for _, indicatorConfig in pairs(tracker.indicatorConfigs) do
-				local indicator = Addon.IndicatorFactory:Instantiate(action, indicatorConfig, tracker)
+				local indicator = Addon.IndicatorFactory:Instantiate(action.button, action, indicatorConfig, tracker)
 				if indicator then
 					AddButtonIndicator(action.button, indicator)
 				end
 			end
-			--TODO: handle optional `return`
-			--return
 		end
 	end
 end

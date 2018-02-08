@@ -12,8 +12,8 @@ local Instance = Class.prototype
 local Private = {}
 Class["__Private"] = Private
 
-function Class:New(actionName, actionType, unit)
-	local obj = Addon.Tracker:New(actionName, actionType)
+function Class:New(actionType, unit)
+	local obj = Addon.Tracker:New(actionType)
 	S:CloneInto(Class.prototype, obj)
 	obj.unit = unit
 	return obj
@@ -24,7 +24,6 @@ function Private:Register()
 
 	function factory:CreateBlank()
 		local tracker = self:Create({
-			actionName = "<action>",
 			track = {
 				unit = "player",
 			},
@@ -40,7 +39,6 @@ function Private:Register()
 		end
 
 		local tracker = Class:New(
-			config.actionName,
 			config.actionType,
 			track.unit
 		)

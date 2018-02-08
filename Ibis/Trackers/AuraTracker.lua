@@ -12,8 +12,8 @@ local Instance = Class.prototype
 local Private = {}
 Class["__Private"] = Private
 
-function Class:New(actionName, actionType, unit, name, buff, stacks)
-	local obj = Addon.Tracker:New(actionName, actionType)
+function Class:New(actionType, unit, name, buff, stacks)
+	local obj = Addon.Tracker:New(actionType)
 	S:CloneInto(Class.prototype, obj)
 	obj.unit = unit
 	obj.name = name
@@ -27,7 +27,6 @@ function Private:Register()
 
 	function factory:CreateBlank()
 		local tracker = self:Create({
-			actionName = "<action>",
 			track = {
 				unit = "player",
 				buff = true,
@@ -44,7 +43,6 @@ function Private:Register()
 		end
 
 		local tracker = Class:New(
-			config.actionName,
 			config.actionType,
 			track.unit,
 			track.name,
@@ -138,6 +136,11 @@ function Instance:Serialize()
 end
 
 function Instance:GetValue()
+	local auraName = self.name or self.frameType:GetActionName(self)
+	if not auraName then
+		return nil, self.stacks
+	end
+
 	local units = {}
 	if self.unit == "friendly" then
 		if IsInRaid() then
@@ -167,7 +170,7 @@ function Instance:GetValue()
 
 	for _, unit in pairs(units) do
 		if UnitExists(unit) then
-			local name, _, _, count, _, duration, expires = UnitAura(unit, self.name or self.actionName, nil, "PLAYER|"..(self.buff and "HELPFUL" or "HARMFUL"))
+			local name, _, _, count, _, duration, expires = UnitAura(unit, auraName, nil, "PLAYER|"..(self.buff and "HELPFUL" or "HARMFUL"))
 			if name and (expires == 0 or GetTime() < expires) then
 				local f = 0
 				if self.stacks then

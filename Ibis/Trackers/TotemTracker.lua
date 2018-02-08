@@ -12,8 +12,8 @@ local Instance = Class.prototype
 local Private = {}
 Class["__Private"] = Private
 
-function Class:New(actionName, actionType, name)
-	local obj = Addon.Tracker:New(actionName, actionType)
+function Class:New(actionType, name)
+	local obj = Addon.Tracker:New(actionType)
 	S:CloneInto(Class.prototype, obj)
 	obj.name = name
 	return obj
@@ -24,7 +24,6 @@ function Private:Register()
 
 	function factory:CreateBlank()
 		local tracker = self:Create({
-			actionName = "<action>",
 			track = {
 				unit = "player",
 			},
@@ -37,7 +36,6 @@ function Private:Register()
 		track = config.track
 
 		local tracker = Class:New(
-			config.actionName,
 			config.actionType,
 			track.name
 		)
@@ -75,10 +73,14 @@ function Instance:Serialize()
 end
 
 function Instance:GetValue()
-	local findName = self.name or self.actionName
+	local myTotem = self.name or self.frameType:GetActionName(self)
+	if not myTotem then
+		return nil, nil
+	end
+
 	for i = 1, 5 do
 		local haveTotem, name, startTime, duration, icon = GetTotemInfo(i)
-		if haveTotem and name == findName then
+		if haveTotem and name == myTotem then
 			local f = (GetTime() - startTime) / duration
 			f = min(max(1 - f, 0.0), 1.0)
 			return f, 1.0

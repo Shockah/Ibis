@@ -32,7 +32,7 @@ function Class:RegisterModifier(factory)
 end
 
 function Class:Instantiate(config)
-	if not config or not config.actionName or not config.track or not config.track.type then
+	if not config or not config.track or not config.track.type then
 		return nil
 	end
 
@@ -44,6 +44,8 @@ function Class:Instantiate(config)
 	local tracker = factory:Create(config)
 	if tracker then
 		tracker.factory = factory
+		tracker.frameType = Addon.FrameType:Get(tracker.actionType)
+		tracker.frameType:Deserialize(config, tracker)
 
 		local sortedFactories = S:Values(modifierFactories)
 		table.sort(sortedFactories, function(a, b)
@@ -81,11 +83,11 @@ end
 
 function Class:Serialize(tracker)
 	local serialized = {
-		actionName = tracker.actionName,
 		actionType = tracker.actionType,
 		track = {},
 		indicators = {},
 	}
+	tracker.frameType:Serialize(tracker, serialized)
 	S:CloneInto(tracker:Serialize(), serialized.track)
 	S:CloneInto(tracker.indicatorConfigs, serialized.indicators)
 

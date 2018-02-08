@@ -18,11 +18,10 @@ local flyoutTextures = {
 	[12] = "Interface/Icons/Spell_Arcane_PortalOrgrimmar",
 }
 
-function Class:New(actionName, actionType)
+function Class:New(actionType)
 	local obj = S:Clone(Class.prototype)
 	obj.customName = nil
-	obj.actionName = actionName
-	obj.actionType = actionType or nil
+	obj.acrionType = actionType
 	obj.faction = nil
 	obj.race = nil
 	obj.class = nil
@@ -31,24 +30,12 @@ function Class:New(actionName, actionType)
 	obj.equipped = nil
 	obj.combat = nil
 	obj.indicatorConfigs = {}
+	obj.frameType = Addon.FrameType:Get(obj.actionType)
 	return obj
 end
 
 function Instance:GetFullActionName()
-	return (self.actionType or "any")..": "..self.actionName
-end
-
-function Instance:GetName()
-	if self.customName then
-		return self.customName
-	end
-
-	local number = tonumber(self.actionName)
-	if number then
-		return "Action Button #"..number
-	end
-
-	return self.actionName
+	return self.frameType:GetFullName(tracker)
 end
 
 function Instance:GetConfigGroupInfo()
@@ -125,7 +112,7 @@ function Class:GetIcon(actionType, actionName, withPlaceholderTexture)
 end
 
 function Instance:GetIcon(withPlaceholderTexture)
-	return Class:GetIcon(self.actionType, self.actionName, withPlaceholderTexture)
+	return self.frameType:GetIcon(tracker, withPlaceholderTexture)
 end
 
 function Instance:HasModifier(factory)
@@ -224,25 +211,8 @@ function Instance:ShouldLoadRightNow()
 	return true
 end
 
-function Instance:Matches(action)
-	if self.actionType and self.actionType ~= action.type then
-		return false
-	end
-
-	if self.actionName then
-		local number = tonumber(self.actionName)
-		if number then
-			if number ~= action.slot then
-				return false
-			end
-		else
-			if self.actionName ~= action.name then
-				return false
-			end
-		end
-	end
-
-	return true
+function Instance:MatchesAction(action)
+	return self.frameType:MatchesAction(tracker, action)
 end
 
 function Instance:Serialize()

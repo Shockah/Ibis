@@ -540,15 +540,6 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 		return
 	end
 
-	local actionTypes = {
-		"<any>",
-		"spell",
-		"item",
-		"flyout",
-		"companion",
-		"macro",
-	}
-
 	local specs = {
 		"<any>",
 	}
@@ -621,42 +612,7 @@ function Addon:UpdateConfigurationFrame(container, tracker)
 	end)
 	container:AddChild(customNameEditbox)
 
-	local actionHeading = AceGUI:Create("Heading")
-	actionHeading:SetText("Action")
-	actionHeading:SetFullWidth(true)
-	container:AddChild(actionHeading)
-
-	local actionTypeDropdown = AceGUI:Create("Dropdown")
-	actionTypeDropdown:SetLabel("Action type")
-	actionTypeDropdown:SetList(actionTypes)
-	actionTypeDropdown:SetValue(S:KeyOf(actionTypes, tracker.actionType or actionTypes[1]))
-	actionTypeDropdown:SetFullWidth(true)
-	actionTypeDropdown:SetCallback("OnValueChanged", function(self, event, key)
-		local value = actionTypes[key]
-		if key == 1 then
-			value = nil
-		end
-		tracker.actionType = value
-		Addon:Refresh(tracker)
-	end)
-	container:AddChild(actionTypeDropdown)
-
-	local spellEditbox = AceGUI:Create("EditBox")
-	spellEditbox:SetLabel("Action")
-	spellEditbox:SetText(tracker.actionName)
-	spellEditbox:SetFullWidth(true)
-	spellEditbox:SetCallback("OnEnterPressed", function(self, event, text)
-		local value = S:StringOrNil(text)
-		if value then
-			tracker.actionName = value
-			self:ClearFocus()
-			Addon:Refresh(tracker)
-		else
-			self:SetText(tracker.actionName)
-			self:ClearFocus()
-		end
-	end)
-	container:AddChild(spellEditbox)
+	BaseAddon.FrameType:CreateConfigMenu(self, tracker, container)
 
 	tracker.factory:CreateConfigMenu(self, tracker, container)
 	BaseAddon.TrackerFactory:CreateConfigMenuForModifiers(self, tracker, container)

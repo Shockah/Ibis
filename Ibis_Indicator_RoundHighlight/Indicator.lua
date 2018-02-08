@@ -15,14 +15,14 @@ Class["__Private"] = Private
 
 local free = {}
 
-function Class:Get(action, config, tracker)
+function Class:Get(parentFrame, action, config, tracker)
 	local obj
 	if S:IsEmpty(free) then
-		obj = Private:Create(action, config, tracker)
+		obj = Private:Create(parentFrame, action, config, tracker)
 	else
 		obj = free[1]
 		table.remove(free, 1)
-		obj:SetParent(action.button)
+		obj:SetParent(parentFrame)
 	end
 	obj:Setup(action, config, tracker)
 	return obj
@@ -40,8 +40,8 @@ function Instance:Free()
 	table.insert(free, self)
 end
 
-function Private:Create(action, config, tracker)
-	local indicator = CreateFrame("frame", nil, action.button or UIParent)
+function Private:Create(parentFrame, action, config, tracker)
+	local indicator = CreateFrame("frame", nil, parentFrame or UIParent)
 	S:CloneInto(Instance, indicator)
 
 	indicator.highlight = Addon.RoundHighlight:Get(indicator)
@@ -50,23 +50,24 @@ function Private:Create(action, config, tracker)
 	return indicator
 end
 
-function Instance:Setup(action, config, tracker)
+function Instance:Setup(parentFrame, action, config, tracker)
 	self.config = config
 	self.action = action
 	self.tracker = tracker
 
 	self:ClearAllPoints()
-	self:SetPoint("CENTER", action.button, "CENTER")
-	
-	self.highlight:SetTexture(config.texture or action.button.Border:GetTexture())
+	self:SetPoint("CENTER", parentFrame, "CENTER")
+
+	local texture = config.texture or ((parentFrame.Border and parentFrame.Border.GetTexture) and parentFrame.Border:GetTexture()) or nil
+	self.highlight:SetTexture(texture)
 	self.highlight:SetBlendMode(config.blendMode or "ADD")
 	self.highlight:SetFrameStrata(config.strata or "MEDIUM")
 	self.highlight:SetDrawLayer(config.layer or "BORDER")
 
 	local function OnUpdate(self)
 		local scale = config.scale or 1.0
-		scale = scale * action.button:GetScale()
-		self:SetSize(action.button:GetWidth() * scale, action.button:GetHeight() * scale)
+		scale = scale * parentFrame:GetScale()
+		self:SetSize(parentFrame:GetWidth() * scale, parentFrame:GetHeight() * scale)
 
 		self:UpdateIndicator()
 	end

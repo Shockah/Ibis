@@ -5,18 +5,20 @@
 ## Author: Shockah-Ghostlands-EU
 ## SavedVariables: IbisDB
 
-# Embedded Ace 3.0 Libraries
+# Libs
 embeds.xml
-
-# Custom libs
 Libs/ShockahUtils.lua
 
 # Addon code
 Core.lua
 Action.lua
 IndicatorFactory.lua
-Tracker.lua
-TrackerFactory.lua
+FrameTypes/FrameType.lua
+Trackers/Tracker.lua
+Trackers/TrackerFactory.lua
+
+FrameTypes/ActionFrameType.lua
+
 Trackers/AuraTracker.lua
 Trackers/CooldownTracker.lua
 Trackers/HealthTracker.lua
@@ -25,6 +27,7 @@ Trackers/PostCastTimerTracker.lua
 Trackers/PowerTracker.lua
 Trackers/ReputationTracker.lua
 Trackers/TotemTracker.lua
+
 Trackers/Modifiers/AlwaysActiveTracker.lua
 Trackers/Modifiers/ExistsTracker.lua
 Trackers/Modifiers/ReverseTracker.lua

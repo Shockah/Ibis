@@ -23,8 +23,8 @@ function Class:Register(factory)
 	factories[factory.type] = factory
 end
 
-function Class:Instantiate(action, config, tracker)
-	if not action or not config or not config.type then
+function Class:Instantiate(parentFrame, action, config, tracker)
+	if not config or not config.type then
 		return nil
 	end
 
@@ -33,7 +33,7 @@ function Class:Instantiate(action, config, tracker)
 		return nil
 	end
 
-	local indicator = factory:Get(action, config, tracker)
+	local indicator = factory:Get(parentFrame, action, config, tracker)
 	if indicator then
 		indicator.action = action
 		indicator.tracker = tracker

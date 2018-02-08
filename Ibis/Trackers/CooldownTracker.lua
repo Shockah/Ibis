@@ -12,8 +12,8 @@ local Instance = Class.prototype
 local Private = {}
 Class["__Private"] = Private
 
-function Class:New(actionName, actionType, trackerAction, trackerActionType)
-	local obj = Addon.Tracker:New(actionName, actionType)
+function Class:New(actionType, trackerAction, trackerActionType)
+	local obj = Addon.Tracker:New(actionType)
 	S:CloneInto(Class.prototype, obj)
 	obj.trackerAction = trackerAction
 	obj.trackerActionType = trackerActionType
@@ -25,7 +25,6 @@ function Private:Register()
 
 	function factory:CreateBlank()
 		local tracker = self:Create({
-			actionName = "<action>",
 			track = {},
 		})
 		tracker.factory = factory
@@ -36,7 +35,6 @@ function Private:Register()
 		track = config.track
 
 		local tracker = Class:New(
-			config.actionName,
 			config.actionType,
 			track.trackerAction,
 			track.trackerActionType
@@ -150,7 +148,11 @@ function Instance:GetSpellCooldown()
 end
 
 function Instance:GetSpellChargeCooldown()
-	local spell = self.trackerAction or self.actionName
+	local spell = self.trackerAction or self.frameType:GetActionName(self)
+	if not spell then
+		return nil, nil
+	end
+
 	local charges, maxCharges, start, duration = GetSpellCharges(spell)
 	if charges then
 		if charges >= maxCharges then
@@ -166,7 +168,7 @@ function Instance:GetSpellChargeCooldown()
 end
 
 function Instance:GetActualSpellCooldown()
-	local spell = self.trackerAction or self.actionName
+	local spell = self.trackerAction or self.frameType:GetActionName(self)
 	if not spell then
 		return nil, nil
 	end
@@ -186,7 +188,7 @@ function Instance:GetActualSpellCooldown()
 end
 
 function Instance:GetItemCooldown()
-	local item = self.trackerAction or self.actionName
+	local item = self.trackerAction or self.frameType:GetActionName(self)
 	if not item then
 		return nil, nil
 	end

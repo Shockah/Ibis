@@ -12,8 +12,8 @@ local Instance = Class.prototype
 local Private = {}
 Class["__Private"] = Private
 
-function Class:New(actionName, actionType, spell, time)
-	local obj = Addon.Tracker:New(actionName, actionType)
+function Class:New(actionType, spell, time)
+	local obj = Addon.Tracker:New(actionType)
 	S:CloneInto(Class.prototype, obj)
 	obj.spell = spell
 	obj.time = time
@@ -26,7 +26,6 @@ function Private:Register()
 
 	function factory:CreateBlank()
 		local tracker = self:Create({
-			actionName = "<action>",
 			track = {
 				time = 15,
 			},
@@ -42,7 +41,6 @@ function Private:Register()
 		end
 
 		local tracker = Class:New(
-			config.actionName,
 			config.actionType,
 			track.spell,
 			track.time
@@ -97,7 +95,12 @@ function Instance:UNIT_SPELLCAST_SUCCEEDED(event, unitID, spell, rank, lineID, s
 		return
 	end
 
-	if spell == (self.spell or self.actionName) then
+	local mySpell = self.spell or self.frameType:GetActionName(self)
+	if not mySpell then
+		return nil, nil
+	end
+
+	if spell == mySpell then
 		self.expires = GetTime() + self.time
 	end
 end

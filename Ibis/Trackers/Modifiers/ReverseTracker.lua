@@ -12,8 +12,8 @@ local Instance = Class.prototype
 local Private = {}
 Class["__Private"] = Private
 
-function Class:New(actionName, actionType, tracker)
-	local obj = Addon.Tracker:New(actionName, actionType)
+function Class:New(actionType, tracker)
+	local obj = Addon.Tracker:New(actionType)
 	S:CloneInto(Class.prototype, obj)
 	obj.tracker = tracker
 	return obj
@@ -24,7 +24,6 @@ function Private:Register()
 
 	function factory:Create(tracker)
 		return Class:New(
-			tracker.actionName,
 			tracker.actionType,
 			tracker
 		)

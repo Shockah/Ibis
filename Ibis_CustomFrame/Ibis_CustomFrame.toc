@@ -1,0 +1,10 @@
+## Interface: 70300
+## Title: Ibis - Custom Frame
+## Notes: Indicators right on your action bars. Handling custom frames.
+## Version: r1
+## Author: Shockah-Ghostlands-EU
+## Dependencies: Ibis
+
+# Addon code
+Core.lua
+CustomFrameType.lua

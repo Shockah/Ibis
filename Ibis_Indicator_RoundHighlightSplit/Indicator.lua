@@ -16,14 +16,14 @@ Class["__Private"] = Private
 
 local free = {}
 
-function Class:Get(action, config, tracker)
+function Class:Get(parentFrame, action, config, tracker)
 	local obj
 	if S:IsEmpty(free) then
-		obj = Private:Create(action, config, tracker)
+		obj = Private:Create(parentFrame, action, config, tracker)
 	else
 		obj = free[1]
 		table.remove(free, 1)
-		obj:SetParent(action.button)
+		obj:SetParent(parentFrame)
 	end
 	obj:Setup(action, config, tracker)
 	return obj
@@ -41,8 +41,8 @@ function Instance:Free()
 	table.insert(free, self)
 end
 
-function Private:Create(action, config, tracker)
-	local indicator = CreateFrame("frame", nil, action.button or UIParent)
+function Private:Create(parentFrame, action, config, tracker)
+	local indicator = CreateFrame("frame", nil, parentFrame or UIParent)
 	S:CloneInto(Instance, indicator)
 
 	indicator.highlights = {}
@@ -50,13 +50,14 @@ function Private:Create(action, config, tracker)
 	return indicator
 end
 
-function Instance:Setup(action, config, tracker)
+function Instance:Setup(parentFrame, action, config, tracker)
+	self.parentFrame = parentFrame
 	self.config = config
 	self.action = action
 	self.tracker = tracker
 
 	self:ClearAllPoints()
-	self:SetPoint("CENTER", action.button, "CENTER")
+	self:SetPoint("CENTER", parentFrame, "CENTER")
 
 	for _, highlight in pairs(self.highlights) do
 		self:SetupHighlight(highlight)
@@ -64,8 +65,8 @@ function Instance:Setup(action, config, tracker)
 
 	local function OnUpdate(self)
 		local scale = self.config.scale or 1.0
-		scale = scale * self.action.button:GetScale()
-		self:SetSize(self.action.button:GetWidth() * scale, self.action.button:GetHeight() * scale)
+		scale = scale * parentFrame:GetScale()
+		self:SetSize(parentFrame:GetWidth() * scale, parentFrame:GetHeight() * scale)
 
 		self:UpdateIndicator()
 	end
@@ -80,7 +81,8 @@ function Instance:SetupHighlight(highlight)
 	highlight:SetPoint("TOPLEFT", self, "TOPLEFT")
 	highlight:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
 
-	highlight:SetTexture(self.config.texture or self.action.button.Border:GetTexture())
+	local texture = self.config.texture or ((self.parentFrame.Border and self.parentFrame.Border.GetTexture) and self.parentFrame.Border:GetTexture()) or nil
+	highlight:SetTexture(texture)
 	highlight:SetBlendMode(self.config.blendMode or "ADD")
 	highlight:SetFrameStrata(self.config.strata or "MEDIUM")
 	highlight:SetDrawLayer(self.config.layer or "BORDER")
