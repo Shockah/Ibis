@@ -32,12 +32,8 @@ function Addon:OnInitialize()
 
 	C_Timer.After(0.0, function()
 		hooksecurefunc(WeakAuras, "pAdd", function(data)
-			if data.region.id then
-				local weakAura = WeakAuras.regions[data.region.id]
-				if weakAura then
-					Addon:SetupWeakAuraIfNeeded(weakAura)
-				end
-			end
+			--TODO: find a better way to handle just one WeakAura
+			Addon:ResetupAllWeakAuraIndicators()
 		end)
 	end)
 end
