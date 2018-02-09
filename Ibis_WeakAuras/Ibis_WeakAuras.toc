@@ -1,0 +1,10 @@
+## Interface: 70300
+## Title: Ibis - WeakAuras
+## Notes: Indicators right on your action bars. Handling WeakAuras.
+## Version: r1
+## Author: Shockah-Ghostlands-EU
+## Dependencies: Ibis, WeakAuras
+
+# Addon code
+Core.lua
+WeakAuraFrameType.lua

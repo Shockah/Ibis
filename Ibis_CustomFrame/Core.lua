@@ -67,7 +67,6 @@ function Addon:SetupFrameIfNeeded(frame)
 end
 
 function Addon:SetupFrame(frame)
-	print("Setting up frame: "..frame:GetName())
 	if not frame[addonName.."hooked"] then
 		frame:HookScript("OnShow", function(self)
 			Addon:SetupFrameIndicators(self)
@@ -127,7 +126,6 @@ function Addon:CreateFrameIndicators(frame)
 			for _, indicatorConfig in pairs(tracker.indicatorConfigs) do
 				local indicator = BaseAddon.IndicatorFactory:Instantiate(frame, nil, indicatorConfig, tracker)
 				if indicator then
-					print("adding indicator to "..frame:GetName())
 					AddFrameIndicator(frame, indicator)
 				end
 			end
