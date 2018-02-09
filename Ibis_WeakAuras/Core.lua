@@ -23,14 +23,17 @@ function Addon:OnInitialize()
 			end
 		end
 	end)
+	BaseAddon:RegisterReloadTrackersDelegate(function(tracker)
+		Addon:ResetupAllWeakAuraIndicators()
+	end)
 	BaseAddon:RegisterTrackerUpdateDelegate(function(tracker)
 		Addon:ResetupAllWeakAuraIndicators()
 	end)
 
 	C_Timer.After(0.0, function()
 		hooksecurefunc(WeakAuras, "pAdd", function(data)
-			if data.id then
-				local weakAura = WeakAuras.regions[data.id]
+			if data.region.id then
+				local weakAura = WeakAuras.regions[data.region.id]
 				if weakAura then
 					Addon:SetupWeakAuraIfNeeded(weakAura)
 				end
@@ -41,7 +44,7 @@ end
 
 function Addon:SetupWeakAuraIfNeeded(weakAura)
 	for _, tracker in pairs(BaseAddon.trackers) do
-		if tracker.frameType.type == "weakaura" and tracker.weakAuraName == weakAura.id then
+		if tracker.frameType.type == "weakaura" and tracker.weakAuraName == weakAura.region.id then
 			self:SetupWeakAura(weakAura)
 			return
 		end
@@ -49,14 +52,14 @@ function Addon:SetupWeakAuraIfNeeded(weakAura)
 end
 
 function Addon:SetupWeakAura(weakAura)
-	if not weakAura.region[addonName.."hooked"] then
+	if not weakAura.region[addonName.."_hooked"] then
 		weakAura.region:HookScript("OnShow", function(self)
 			Addon:SetupWeakAuraIndicators(weakAura)
 		end)
 		weakAura.region:HookScript("OnHide", function(self)
 			Addon:SetupWeakAuraIndicators(weakAura)
 		end)
-		weakAura.region[addonName.."hooked"] = true
+		weakAura.region[addonName.."_hooked"] = true
 	end
 	if weakAura.region:IsVisible() then
 		self:SetupWeakAuraIndicators(weakAura)
@@ -88,7 +91,7 @@ function Addon:ClearWeakAuraIndicators(weakAura)
 	end
 	S:Clear(indicators)
 
-	weakAuras[weakAura.id] = nil
+	weakAuras[weakAura.region.id] = nil
 end
 
 local function AddWeakAuraIndicator(weakAura, indicator)
@@ -101,10 +104,10 @@ local function AddWeakAuraIndicator(weakAura, indicator)
 end
 
 function Addon:CreateWeakAuraIndicators(weakAura)
-	weakAuras[weakAura.id] = weakAura
+	weakAuras[weakAura.region.id] = weakAura
 
 	for _, tracker in pairs(BaseAddon.trackers) do
-		if tracker.frameType.type == "weakaura" and tracker.weakAuraName == weakAura.id then
+		if tracker.frameType.type == "weakaura" and tracker.weakAuraName == weakAura.region.id then
 			for _, indicatorConfig in pairs(tracker.indicatorConfigs) do
 				local indicator = BaseAddon.IndicatorFactory:Instantiate(weakAura.region, nil, indicatorConfig, tracker)
 				if indicator then

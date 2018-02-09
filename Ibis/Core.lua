@@ -15,6 +15,7 @@ local actionButtonHandlers = {}
 local indicatorFactories = {}
 local deserializeDelegates = {}
 local trackerUpdateDelegates = {}
+local reloadTrackersDelegates = {}
 
 local original_Vanilla_ShowOverlayGlow = nil
 local original_LibButtonGlow_ShowOverlayGlow = nil
@@ -142,6 +143,10 @@ function Addon:ReloadTrackers()
 		return tracker:ShouldLoad()
 	end)
 	self:SetupAllActionButtons()
+
+	for _, delegate in pairs(reloadTrackersDelegates) do
+		delegate()
+	end
 end
 
 function Addon:ACTIONBAR_SLOT_CHANGED(event, slot)
@@ -186,6 +191,10 @@ function Addon:FireTrackerUpdateDelegates(tracker)
 	for _, delegate in pairs(trackerUpdateDelegates) do
 		delegate(tracker)
 	end
+end
+
+function Addon:RegisterReloadTrackersDelegate(func)
+	table.insert(reloadTrackersDelegates, func)
 end
 
 function Addon:RegisterDeserializeDelegate(func)

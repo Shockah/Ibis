@@ -77,28 +77,39 @@ function Addon:OnInitialize()
 		textureGroup:SetFullWidth(true)
 		container:AddChild(textureGroup)
 
+		local defaultTexture, defaultTextureName = tracker.frameType:GetDefaultTexture(nil)
+
 		local textureEditbox = AceGUI:Create("EditBox")
-		textureEditbox:SetText(indicatorConfig.texture or "<use the button border texture>")
+		textureEditbox:SetText(indicatorConfig.texture or defaultTextureName or "")
 		textureEditbox:SetFullWidth(true)
 		textureEditbox:SetCallback("OnEnterPressed", function(self, event, text)
+			if text == defaultTextureName then
+				text = nil
+			end
 			indicatorConfig.texture = S:StringOrNil(text)
 			self:ClearFocus()
 			configAddon:Refresh(tracker)
 		end)
 		textureGroup:AddChild(textureEditbox)
 
-		local borderTextureButton = AceGUI:Create("Button")
-		borderTextureButton:SetText("Button border")
-		borderTextureButton:SetRelativeWidth(0.5)
-		borderTextureButton:SetCallback("OnClick", function(self, event)
-			indicatorConfig.texture = nil
-			configAddon:Refresh(tracker)
-		end)
-		textureGroup:AddChild(borderTextureButton)
+		if defaultTextureName then
+			local borderTextureButton = AceGUI:Create("Button")
+			borderTextureButton:SetText(defaultTextureName)
+			borderTextureButton:SetRelativeWidth(0.5)
+			borderTextureButton:SetCallback("OnClick", function(self, event)
+				indicatorConfig.texture = nil
+				configAddon:Refresh(tracker)
+			end)
+			textureGroup:AddChild(borderTextureButton)
+		end
 
 		local vanillaTextureButton = AceGUI:Create("Button")
 		vanillaTextureButton:SetText("Vanilla")
-		vanillaTextureButton:SetRelativeWidth(0.5)
+		if defaultTextureName then
+			vanillaTextureButton:SetRelativeWidth(0.5)
+		else
+			vanillaTextureButton:SetFullWidth(true)
+		end
 		vanillaTextureButton:SetCallback("OnClick", function(self, event)
 			indicatorConfig.texture = "Interface/BUTTONS/UI-ActionButton-Border"
 			configAddon:Refresh(tracker)

@@ -7,7 +7,7 @@ local BaseAddon = _G[S:Split(addonName, "_")[1]]
 local Class = {
 	prototype = {},
 }
-Addon.WeakAurasFrameType = Class
+Addon.WeakAuraFrameType = Class
 local Instance = Class.prototype
 
 local Private = {}

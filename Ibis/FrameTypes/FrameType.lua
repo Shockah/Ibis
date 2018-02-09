@@ -97,6 +97,6 @@ function Instance:GetActionName(tracker)
 	return nil
 end
 
-function Instance:MatchesAction(tracker, action)
-	return false
+function Instance:GetDefaultTexture(parentFrame)
+	return nil, nil
 end

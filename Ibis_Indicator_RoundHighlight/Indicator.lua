@@ -58,7 +58,7 @@ function Instance:Setup(parentFrame, action, config, tracker)
 	self:ClearAllPoints()
 	self:SetPoint("CENTER", parentFrame, "CENTER")
 
-	local texture = config.texture or ((parentFrame.Border and parentFrame.Border.GetTexture) and parentFrame.Border:GetTexture()) or nil
+	local texture = config.texture or tracker.frameType:GetDefaultTexture() or nil
 	self.highlight:SetTexture(texture)
 	self.highlight:SetBlendMode(config.blendMode or "ADD")
 	self.highlight:SetFrameStrata(config.strata or "MEDIUM")

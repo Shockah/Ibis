@@ -95,3 +95,7 @@ end
 function Instance:Deserialize(input, tracker)
 	tracker.actionName = input.actionName
 end
+
+function Instance:GetDefaultTexture(parentFrame)
+	return parentFrame and parentFrame.Border:GetTexture(), "<button border>"
+end

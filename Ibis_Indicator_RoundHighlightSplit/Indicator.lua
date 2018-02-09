@@ -81,7 +81,7 @@ function Instance:SetupHighlight(highlight)
 	highlight:SetPoint("TOPLEFT", self, "TOPLEFT")
 	highlight:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
 
-	local texture = self.config.texture or ((self.parentFrame.Border and self.parentFrame.Border.GetTexture) and self.parentFrame.Border:GetTexture()) or nil
+	local texture = self.config.texture or self.tracker.frameType:GetDefaultTexture() or nil
 	highlight:SetTexture(texture)
 	highlight:SetBlendMode(self.config.blendMode or "ADD")
 	highlight:SetFrameStrata(self.config.strata or "MEDIUM")

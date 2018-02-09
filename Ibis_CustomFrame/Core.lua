@@ -34,6 +34,9 @@ function Addon:OnInitialize()
 			end
 		end
 	end)
+	BaseAddon:RegisterReloadTrackersDelegate(function(tracker)
+		Addon:ResetupAllFrameIndicators()
+	end)
 	BaseAddon:RegisterTrackerUpdateDelegate(function(tracker)
 		Addon:ResetupAllFrameIndicators()
 	end)
