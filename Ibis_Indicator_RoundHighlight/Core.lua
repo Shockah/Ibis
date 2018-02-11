@@ -116,6 +116,8 @@ function Addon:OnInitialize()
 		end)
 		textureGroup:AddChild(vanillaTextureButton)
 
+		self:AddOffsetConfig(configAddon, tracker, container, indicatorConfig, false, true)
+
 		local scaleSlider = AceGUI:Create("Slider")
 		scaleSlider:SetLabel("Scale")
 		scaleSlider:SetSliderValues(0.0, 5.0, 0.01)
@@ -199,6 +201,94 @@ function Addon:OnInitialize()
 			configAddon:Refresh(tracker)
 		end)
 		container:AddChild(fullDegreesSlider)
+	end
+
+	function factory:AddOffsetConfig(configAddon, tracker, container, indicatorConfig, percentage, pixel)
+		local AceGUI = LibStub("AceGUI-3.0")
+		local both = percentage and pixel
+
+		local group = container
+
+		if both then
+			local offsetGroup = AceGUI:Create("InlineGroup")
+			offsetGroup:SetLayout("List")
+			offsetGroup:SetTitle("Offset")
+			offsetGroup:SetFullWidth(true)
+			group:AddChild(offsetGroup)
+			group = offsetGroup
+		end
+
+		if percentage then
+			local percentageOffsetGroup = AceGUI:Create("InlineGroup")
+			percentageOffsetGroup:SetLayout("Flow")
+			percentageOffsetGroup:SetTitle(both and "Percentage" or "Percentage Offset")
+			percentageOffsetGroup:SetFullWidth(true)
+			group:AddChild(percentageOffsetGroup)
+
+			local percentageXSlider = AceGUI:Create("Slider")
+			percentageXSlider:SetLabel("X")
+			percentageXSlider:SetSliderValues(-1.5, 1.5, 0.01)
+			percentageXSlider:SetValue(indicatorConfig.percentOffX or 0.0)
+			percentageXSlider:SetRelativeWidth(0.5)
+			percentageXSlider:SetCallback("OnMouseUp", function(self, event, value)
+				if value == 0.0 then
+					value = nil
+				end
+				indicatorConfig.percentOffX = value
+				configAddon:Refresh(tracker)
+			end)
+			percentageOffsetGroup:AddChild(percentageXSlider)
+
+			local percentageYSlider = AceGUI:Create("Slider")
+			percentageYSlider:SetLabel("Y")
+			percentageYSlider:SetSliderValues(-1.5, 1.5, 0.01)
+			percentageYSlider:SetValue(indicatorConfig.percentOffY or 0.0)
+			percentageYSlider:SetRelativeWidth(0.5)
+			percentageYSlider:SetCallback("OnMouseUp", function(self, event, value)
+				if value == 0.0 then
+					value = nil
+				end
+				indicatorConfig.percentOffY = value
+				configAddon:Refresh(tracker)
+			end)
+			percentageOffsetGroup:AddChild(percentageYSlider)
+		end
+
+		if pixel then
+			local pixelOffsetGroup = AceGUI:Create("InlineGroup")
+			pixelOffsetGroup:SetLayout("Flow")
+			pixelOffsetGroup:SetTitle(both and "Pixel" or "Pixel Offset")
+			pixelOffsetGroup:SetFullWidth(true)
+			group:AddChild(pixelOffsetGroup)
+
+			local pixelXSlider = AceGUI:Create("Slider")
+			pixelXSlider:SetLabel("X")
+			pixelXSlider:SetSliderValues(-100, 100, 1)
+			pixelXSlider:SetValue(indicatorConfig.offX or 0)
+			pixelXSlider:SetRelativeWidth(0.5)
+			pixelXSlider:SetCallback("OnMouseUp", function(self, event, value)
+				if value == 0 then
+					value = nil
+				end
+				indicatorConfig.offX = value
+				configAddon:Refresh(tracker)
+			end)
+			pixelOffsetGroup:AddChild(pixelXSlider)
+
+			local pixelYSlider = AceGUI:Create("Slider")
+			pixelYSlider:SetLabel("Y")
+			pixelYSlider:SetSliderValues(-100, 100, 1)
+			pixelYSlider:SetValue(indicatorConfig.offY or 0)
+			pixelYSlider:SetRelativeWidth(0.5)
+			pixelYSlider:SetCallback("OnMouseUp", function(self, event, value)
+				if value == 0 then
+					value = nil
+				end
+				indicatorConfig.offY = value
+				configAddon:Refresh(tracker)
+			end)
+			pixelOffsetGroup:AddChild(pixelYSlider)
+		end
 	end
 
 	function factory:AddSpecificConfig(configAddon, tracker, container, indicatorConfig)

@@ -56,7 +56,7 @@ function Instance:Setup(parentFrame, action, config, tracker)
 	self.tracker = tracker
 
 	self:ClearAllPoints()
-	self:SetPoint("CENTER", parentFrame, "CENTER")
+	self:SetPoint("CENTER", parentFrame, "CENTER", config.offX or 0, config.offY or 0)
 
 	local texture = config.texture or tracker.frameType:GetDefaultTexture(parentFrame) or nil
 	self.highlight:SetTexture(texture)

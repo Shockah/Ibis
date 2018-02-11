@@ -57,7 +57,7 @@ function Instance:Setup(parentFrame, action, config, tracker)
 	self.tracker = tracker
 
 	self:ClearAllPoints()
-	self:SetPoint("CENTER", parentFrame, "CENTER")
+	self:SetPoint("CENTER", parentFrame, "CENTER", config.offX or 0, config.offY or 0)
 
 	for _, highlight in pairs(self.highlights) do
 		self:SetupHighlight(highlight)
