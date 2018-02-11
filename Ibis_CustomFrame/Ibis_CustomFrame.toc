@@ -1,7 +1,7 @@
 ## Interface: 70300
 ## Title: Ibis - Custom Frame
 ## Notes: Indicators right on your action bars. Handling custom frames.
-## Version: r1
+## Version: r2
 ## Author: Shockah-Ghostlands-EU
 ## Dependencies: Ibis
 

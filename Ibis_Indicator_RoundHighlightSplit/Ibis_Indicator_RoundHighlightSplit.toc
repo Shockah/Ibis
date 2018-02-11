@@ -1,7 +1,7 @@
 ## Interface: 70300
 ## Title: Ibis - Indicator - Round Highlight - Split
 ## Notes: Indicators right on your action bars. Round highlight indicators, split per stack.
-## Version: r1
+## Version: r2
 ## Author: Shockah-Ghostlands-EU
 ## Dependencies: Ibis, Ibis_Indicator_RoundHighlight
 

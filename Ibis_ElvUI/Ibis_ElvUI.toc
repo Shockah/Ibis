@@ -1,7 +1,7 @@
 ## Interface: 70300
 ## Title: Ibis - ElvUI
 ## Notes: Indicators right on your action bars. Handling ElvUI action bars.
-## Version: r1
+## Version: r2
 ## Author: Shockah-Ghostlands-EU
 ## Dependencies: Ibis, ElvUI
 
