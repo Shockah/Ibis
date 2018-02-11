@@ -36,7 +36,7 @@ end
 
 function Instance:GetName()
 	local base = self:GetBase()
-	return base.customName or base.frameType:GetName(base)
+	return self.customName or base.customName or base.frameType:GetName(base)
 end
 
 function Instance:GetConfigGroupInfo()
