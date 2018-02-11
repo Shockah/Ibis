@@ -13,15 +13,6 @@ function Addon:OnInitialize()
 
 	BaseAddon:RegisterDeserializeDelegate(function()
 		Addon:ResetupAllWeakAuraIndicators()
-
-		for _, tracker in pairs(BaseAddon.trackers) do
-			if tracker.frameType.type == "weakaura" and tracker.weakAuraName then
-				local weakAura = WeakAuras.regions[tracker.weakAuraName]
-				if weakAura then
-					Addon:SetupWeakAuraIfNeeded(weakAura)
-				end
-			end
-		end
 	end)
 	BaseAddon:RegisterReloadTrackersDelegate(function(tracker)
 		Addon:ResetupAllWeakAuraIndicators()
@@ -33,12 +24,23 @@ function Addon:OnInitialize()
 	C_Timer.After(0.0, function()
 		hooksecurefunc(WeakAuras, "pAdd", function(data)
 			--TODO: find a better way to handle just one WeakAura
-			Addon:ResetupAllWeakAuraIndicators()
+			C_Timer.After(0.0, function()
+				Addon:ResetupAllWeakAuraIndicators()
+			end)
+		end)
+		hooksecurefunc(WeakAuras, "Rename", function(data, newid)
+			--TODO: find a better way to handle just one WeakAura (need the old id)
+			C_Timer.After(0.0, function()
+				Addon:ResetupAllWeakAuraIndicators()
+			end)
 		end)
 	end)
 end
 
 function Addon:SetupWeakAuraIfNeeded(weakAura)
+	if not weakAura.region then
+		return
+	end
 	for _, tracker in pairs(BaseAddon.trackers) do
 		if tracker.frameType.type == "weakaura" and tracker.weakAuraName == weakAura.region.id then
 			self:SetupWeakAura(weakAura)
@@ -48,6 +50,9 @@ function Addon:SetupWeakAuraIfNeeded(weakAura)
 end
 
 function Addon:SetupWeakAura(weakAura)
+	if not weakAura.region then
+		return
+	end
 	if not weakAura.region[addonName.."_hooked"] then
 		weakAura.region:HookScript("OnShow", function(self)
 			Addon:SetupWeakAuraIndicators(weakAura)
@@ -67,9 +72,21 @@ function Addon:ResetupAllWeakAuraIndicators()
 	for _, weakAura in pairs(clonedWeakAuras) do
 		self:SetupWeakAuraIndicators(weakAura)
 	end
+
+	for _, tracker in pairs(BaseAddon.trackers) do
+		if tracker.frameType.type == "weakaura" and tracker.weakAuraName then
+			local weakAura = WeakAuras.regions[tracker.weakAuraName]
+			if weakAura then
+				self:SetupWeakAuraIfNeeded(weakAura)
+			end
+		end
+	end
 end
 
 function Addon:SetupWeakAuraIndicators(weakAura)
+	if not weakAura.region then
+		return
+	end
 	self:ClearWeakAuraIndicators(weakAura)
 	if weakAura.region:IsVisible() then
 		self:CreateWeakAuraIndicators(weakAura)
@@ -77,6 +94,9 @@ function Addon:SetupWeakAuraIndicators(weakAura)
 end
 
 function Addon:ClearWeakAuraIndicators(weakAura)
+	if not weakAura.region then
+		return
+	end
 	if not weakAura.region[addonName.."_indicators"] then
 		return
 	end

@@ -56,7 +56,7 @@ function Instance:GetIcon(tracker, withPlaceholderTexture)
 	end
 
 	local weakAura = Addon.weakAuras[tracker.weakAuraName]
-	if not weakAura then
+	if not weakAura or not weakAura.region then
 		return withPlaceholderTexture and "Interface/Icons/INV_Misc_QuestionMark" or nil
 	end
 
